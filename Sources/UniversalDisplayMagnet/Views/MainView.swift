@@ -22,6 +22,7 @@ struct MainView: View {
                     case .windows: WindowsView()
                     case .snapping: SnappingView()
                     case .sync: SyncView()
+                    case .activity: ActivityView()
                     case .settings: SettingsView()
                     }
                 }

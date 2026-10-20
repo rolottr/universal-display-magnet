@@ -94,6 +94,7 @@ struct LinkedMacsView: View {
                     linkCard(r)
                 }
                 wakeCard
+                resetCard
             }
             .padding(22)
         }
@@ -323,6 +324,30 @@ struct LinkedMacsView: View {
             .font(.caption).foregroundStyle(.secondary)
         }
         .toggleStyle(.switch)
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color(nsColor: .controlBackgroundColor)))
+    }
+
+    private var resetCard: some View {
+        let others = model.peers.map(\.name)
+        return HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(.blue).font(.title3)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Universal Control stopped working?").font(.callout.weight(.medium))
+                Text(
+                    others.isEmpty
+                        ? "Restarts the services Universal Control runs on, on this Mac, then puts your arrangement back if it was lost. Open Universal Display Magnet on the other Mac to reset it too."
+                        : "Restarts the services Universal Control runs on, on this Mac and on \(others.joined(separator: " and ")) over your network, then puts your arrangement back if it was lost. Takes about 10 seconds."
+                )
+                .font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if model.resettingUniversalControl {
+                ProgressView().controlSize(.small)
+            }
+            Button("Reset Universal Control") { model.resetUniversalControl() }
+                .disabled(model.resettingUniversalControl || !UCBridge.isAvailable)
+        }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color(nsColor: .controlBackgroundColor)))
     }

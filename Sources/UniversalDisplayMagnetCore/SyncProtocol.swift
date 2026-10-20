@@ -86,6 +86,14 @@ public struct SyncEnvelope: Codable, Sendable {
         case hello, records, ping
         /// Turn your display on: the other Mac just woke up or was unlocked.
         case wake
+        /// Restart your Universal Control services: the other Mac is resetting it.
+        case resetUniversalControl
+        /// Sent by a newer version; ignored.
+        case unknown
+
+        public init(from decoder: Decoder) throws {
+            self = Kind(rawValue: try decoder.singleValueContainer().decode(String.self)) ?? .unknown
+        }
     }
 
     public var kind: Kind
@@ -101,6 +109,7 @@ public struct SyncEnvelope: Codable, Sendable {
     public static var ping: SyncEnvelope { SyncEnvelope(kind: .ping, sentAt: Date()) }
     public static func ping(asleep: Bool) -> SyncEnvelope { SyncEnvelope(kind: .ping, sentAt: Date(), asleep: asleep) }
     public static var wake: SyncEnvelope { SyncEnvelope(kind: .wake, sentAt: Date()) }
+    public static var resetUniversalControl: SyncEnvelope { SyncEnvelope(kind: .resetUniversalControl, sentAt: Date()) }
 }
 
 public enum SyncFrameError: Error, Equatable {

@@ -158,6 +158,16 @@ import Testing
         }
     }
 
+    @Test func resetRoundTripsAndUnknownKindsAreTolerated() throws {
+        let secret = SyncSecret(passphrase: "x")
+        var reader = SyncFrameReader()
+        let body = try reader.append(try SyncFraming.encode(.resetUniversalControl, secret: secret))[0]
+        #expect(try SyncFraming.decode(body, secret: secret).kind == .resetUniversalControl)
+
+        let future = try JSONDecoder().decode(SyncEnvelope.Kind.self, from: Data(#""somethingNew""#.utf8))
+        #expect(future == .unknown)
+    }
+
     @Test func generatedPassphraseShape() {
         let p = SyncSecret.generatePassphrase()
         #expect(p.count == 24)

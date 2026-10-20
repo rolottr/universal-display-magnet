@@ -161,6 +161,28 @@ enum UCBridge {
         return UniversalControlLink(display1: d1, display2: d2, edge: edge, fixedOffset1: l.offset1, fixedOffset2: l.offset2)
     }
 
+    // MARK: - Reset
+
+    /// The services Universal Control runs on: Bluetooth discovery (sharingd),
+    /// the Continuity link between Macs (rapportd) and Universal Control
+    /// itself. They run as this user and launchd starts them again at once,
+    /// so stopping them resets a Universal Control that lost the other Mac.
+    /// (`launchctl kickstart` is refused under SIP, and Universal Control
+    /// ignores SIGTERM, so it gets SIGKILL.)
+    static func restartServices() {
+        killall(["sharingd", "rapportd"])
+        killall(["-KILL", "UniversalControl"])
+    }
+
+    private static func killall(_ arguments: [String]) {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
+        p.arguments = arguments
+        p.standardError = FileHandle.nullDevice
+        try? p.run()
+        p.waitUntilExit()
+    }
+
     // MARK: - Backups
 
     static var backupDirectory: URL { Persistence.directory.appendingPathComponent("universal-control-backups") }

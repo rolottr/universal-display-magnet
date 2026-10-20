@@ -27,6 +27,8 @@ struct AppSettings: Codable, Equatable {
     /// Universal Control ids: this Mac, and the Macs it has been linked with.
     var ucSelf: String?
     var ucPeers: [String] = []
+    /// The cross-Mac arrangement last set here, put back after a reset.
+    var ucLink: UCLink?
     var manualPeers: [String] = []
     var hotkeysEnabled = true
     var snapThreshold = 48
@@ -52,6 +54,7 @@ struct AppSettings: Codable, Equatable {
         syncOn = try c.decodeIfPresent(Bool.self, forKey: .syncOn) ?? d.syncOn
         ucSelf = try c.decodeIfPresent(String.self, forKey: .ucSelf)
         ucPeers = try c.decodeIfPresent([String].self, forKey: .ucPeers) ?? d.ucPeers
+        ucLink = try c.decodeIfPresent(UCLink.self, forKey: .ucLink)
         manualPeers = try c.decodeIfPresent([String].self, forKey: .manualPeers) ?? d.manualPeers
         hotkeysEnabled = try c.decodeIfPresent(Bool.self, forKey: .hotkeysEnabled) ?? d.hotkeysEnabled
         snapThreshold = try c.decodeIfPresent(Int.self, forKey: .snapThreshold) ?? d.snapThreshold

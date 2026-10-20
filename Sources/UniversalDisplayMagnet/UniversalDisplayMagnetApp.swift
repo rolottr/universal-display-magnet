@@ -49,6 +49,10 @@ struct AppCommands: Commands {
             Button("Window Snapping…") { MainWindow.show(.snapping) }
                 .keyboardShortcut("2")
             Button("Wake Other Mac") { model.wakeOtherMacs() }
+            Button("Reset Universal Control") { model.resetUniversalControl() }
+                .disabled(model.resettingUniversalControl)
+            Button("Activity…") { MainWindow.show(.activity) }
+                .keyboardShortcut("6")
             Button("Identify Displays") {
                 IdentifyOverlay.show(names: Dictionary(uniqueKeysWithValues: model.displays.map { ($0.id, $0.identity.name) }))
             }
@@ -255,7 +259,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 enum AppSection: String, CaseIterable, Identifiable {
     // Sidebar order.
-    case windows, snapping, displays, linked, sync, settings
+    case windows, snapping, displays, linked, sync, activity, settings
     var id: String { rawValue }
 
     var title: String {
@@ -265,6 +269,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .windows: return "Workspaces"
         case .snapping: return "Window Snapping"
         case .sync: return "Macs & Sync"
+        case .activity: return "Activity"
         case .settings: return "Settings"
         }
     }
@@ -276,6 +281,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .windows: return "macwindow.on.rectangle"
         case .snapping: return "rectangle.split.2x2"
         case .sync: return "arrow.triangle.2.circlepath"
+        case .activity: return "waveform.path.ecg"
         case .settings: return "gearshape"
         }
     }

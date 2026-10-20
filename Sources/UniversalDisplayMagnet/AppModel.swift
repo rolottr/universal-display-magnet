@@ -62,6 +62,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var peers: [SyncService.Peer] = []
     /// Connected Macs whose screens are asleep.
     @Published private(set) var sleepingPeers: Set<String> = []
+    @Published private(set) var resettingUniversalControl = false
     @Published private(set) var activity: String?
     @Published private(set) var message = ""
     @Published private(set) var log: [LogLine] = []
@@ -119,6 +120,12 @@ final class AppModel: ObservableObject {
             self?.suppressWakeUntil = Date().addingTimeInterval(30)
             WakeService.wakeDisplay()
             self?.note("Woken by \(self?.deviceName(from) ?? "another Mac")", quiet: true)
+        }
+        sync.onResetUniversalControl = { [weak self] from in
+            guard let self else { return }
+            self.note("\(self.deviceName(from)) is resetting Universal Control")
+            // The Mac that started the reset puts the arrangement back.
+            self.restartUniversalControl(restoreArrangement: false)
         }
     }
 
@@ -286,6 +293,7 @@ final class AppModel: ObservableObject {
         guard let link else { return }
         do {
             try UCBridge.apply(link)
+            settings.ucLink = link
             refreshUniversalControl()
             note("Universal Control updated (\(link.summary))")
         } catch {
@@ -324,10 +332,46 @@ final class AppModel: ObservableObject {
         do {
             try UCBridge.undo()
             refreshUniversalControl()
+            if let saved = settings.ucLink {
+                settings.ucLink = universalControl?.link(from: saved.device1, to: saved.device2)
+            }
             note("Universal Control arrangement restored")
         } catch {
             note(error.localizedDescription)
         }
+    }
+
+    /// Restart Universal Control here and, over the network, on the other
+    /// Macs; then put back the arrangement set here if Universal Control lost it.
+    func resetUniversalControl() {
+        guard !resettingUniversalControl else { return }
+        for p in peers { sync.sendResetUniversalControl(to: p.id) }
+        let names = ["this Mac"] + peers.map(\.name)
+        note("Resetting Universal Control on \(names.joined(separator: " and "))")
+        restartUniversalControl(restoreArrangement: true)
+    }
+
+    private func restartUniversalControl(restoreArrangement: Bool) {
+        resettingUniversalControl = true
+        DispatchQueue.global().async {
+            UCBridge.restartServices()
+            // Give the services time to start and find the other Mac again.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 8) { [weak self] in
+                guard let self else { return }
+                self.resettingUniversalControl = false
+                self.refreshUniversalControl()
+                if restoreArrangement { self.restoreUniversalControlArrangement() }
+            }
+        }
+    }
+
+    /// Re-apply the arrangement last set here when Universal Control no longer
+    /// has it (another Mac can replace it with an empty one).
+    private func restoreUniversalControlArrangement() {
+        guard let saved = settings.ucLink, let state = universalControl,
+            state.link(from: saved.device1, to: saved.device2) != saved
+        else { return }
+        applyUniversalControl(saved)
     }
 
     /// Turn the other Macs' displays on (or wake them over the network).

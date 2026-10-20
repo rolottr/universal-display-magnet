@@ -24,6 +24,8 @@ final class SyncService {
     var onRecords: (([SyncRecord], String) -> Void)?
     /// The peer just woke up or was unlocked and asks us to turn the display on.
     var onWake: ((String) -> Void)?
+    /// The peer is resetting Universal Control and asks us to do the same.
+    var onResetUniversalControl: ((String) -> Void)?
     /// A peer's screens went to sleep or woke (peer id, asleep).
     var onPeerAsleep: ((String, Bool) -> Void)?
     var onLog: ((String) -> Void)?
@@ -102,6 +104,13 @@ final class SyncService {
         queue.async {
             guard let c = self.connections.values.first(where: { $0.peerID == peerID }) else { return }
             self.send(.wake, on: c)
+        }
+    }
+
+    func sendResetUniversalControl(to peerID: String) {
+        queue.async {
+            guard let c = self.connections.values.first(where: { $0.peerID == peerID }) else { return }
+            self.send(.resetUniversalControl, on: c)
         }
     }
 
@@ -392,11 +401,14 @@ final class SyncService {
         case .wake:
             guard let from = peer.peerID else { return }
             DispatchQueue.main.async { self.onWake?(from) }
+        case .resetUniversalControl:
+            guard let from = peer.peerID else { return }
+            DispatchQueue.main.async { self.onResetUniversalControl?(from) }
         case .ping where envelope.asleep != nil:
             if let from = peer.peerID, let asleep = envelope.asleep {
                 DispatchQueue.main.async { self.onPeerAsleep?(from, asleep) }
             }
-        case .ping:
+        case .ping, .unknown:
             break
         }
     }

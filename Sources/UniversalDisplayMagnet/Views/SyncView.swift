@@ -21,7 +21,6 @@ struct SyncView: View {
                 }
                 connection
                 devices
-                log
             }
             .padding(22)
         }
@@ -126,21 +125,6 @@ struct SyncView: View {
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: 10).fill(Color(nsColor: .controlBackgroundColor)))
             }
-        }
-    }
-
-    private var log: some View {
-        DisclosureGroup("Activity") {
-            VStack(alignment: .leading, spacing: 2) {
-                ForEach(model.log.suffix(60).reversed()) { line in
-                    HStack(alignment: .top) {
-                        Text(line.date.formatted(date: .omitted, time: .standard))
-                            .font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
-                        Text(line.text).font(.system(size: 11)).textSelection(.enabled)
-                    }
-                }
-            }
-            .padding(.top, 6)
         }
     }
 

@@ -34,6 +34,7 @@ Universal Display Magnet fixes the arrangement once and puts it back every time.
 | **Automatic snapshots** | Window positions are recorded every few minutes and as the screens go to sleep, then restored when a monitor setup reconnects or the Mac wakes with its displays changed. |
 | **Window snapping** | Magnet's commands with Magnet's shortcuts: halves, quarters, next/previous display, maximize, centre and restore. Add your own: draw any size and position on a grid. Drag a window to a screen edge or corner to snap it, with a preview. |
 | **Sync between Macs** | Arrangements, workspaces and each Mac's displays sync directly over Wi-Fi, Ethernet or a Thunderbolt cable, encrypted, with no cloud. Your Macs recognise each other through Universal Control; nothing to pair. Arrange the other Mac's own displays from this one. |
+| **Universal Control activity and reset** | An **Activity** page shows, in plain words, what Universal Control does with your other Mac: Bluetooth signal dropouts, connections, arrangement changes and input it had to throw away. When it stops working, **Reset Universal Control** restarts its services on both Macs over your network and puts your arrangement back. |
 | **Wake the other Mac** | When this Mac wakes or you unlock it, your other Mac's display turns on too (Wake-on-LAN if it's fully asleep). While the other Mac's screens are asleep, **Wake Other Mac** appears in the menu bar. |
 | **Menu bar and Dock** | Snap buttons, Save Workspace and your workspaces (with previews, two per row) from the menu bar; workspaces in the Dock menu. |
 | **Mac integration** | Open at login, global shortcuts, a Dock icon and app menus, and a daily update check against this repository's releases. |
@@ -147,7 +148,7 @@ The app renders `.github/assets/showcase.webp` and `menubar.webp` itself from sc
 | `⇧⌘S` `⇧⌘R` | Save Workspace…, restore latest windows (app menu). |
 | `⌘J` | Snap displays together (app menu). |
 | `⌘0` | Open the Universal Display Magnet window. |
-| `⌘1` – `⌘5` | Open Workspaces, Window Snapping, Displays, Universal Control or Macs & Sync. |
+| `⌘1` – `⌘6` | Open Workspaces, Window Snapping, Displays, Universal Control, Macs & Sync or Activity. |
 
 Every snap shortcut can be changed or turned off under **Window Snapping**, and each workspace can have its own. If another app (such as Magnet) already owns a shortcut, Universal Display Magnet flags it.
 
@@ -180,6 +181,10 @@ Another app probably owns them. Quit Magnet (or similar) and reopen Universal Di
 ### The other Mac doesn't appear
 
 Both Macs need Universal Display Magnet running, Universal Control linked once, and **Local Network** allowed. If Bonjour can't see the other Mac, add it by address under **Macs & Sync**.
+
+### Universal Control stops working
+
+Use **Displays → Reset Universal Control** (or the button under **Universal Control**). It restarts the services Universal Control runs on, on this Mac and over your network on the other Mac, then puts your arrangement back if Universal Control lost it. Both Macs need version 0.1.1 or later. **Activity** (`⌘6`) shows what happened: frequent Bluetooth dropouts usually mean interference next to one of the Macs (USB 3 hubs, drives and cables) or too much distance between them.
 
 ### Inspect Universal Control
 
