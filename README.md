@@ -67,7 +67,7 @@ Install Universal Display Magnet on both and link the Macs once with Universal C
 
 ### About downloaded builds
 
-Builds are **ad-hoc signed**, not Developer ID signed or notarized, so macOS may block a downloaded copy. Open it via **System Settings → Privacy & Security → Open Anyway**, or build locally. The project doesn't include a signing certificate or ask you to disable system security settings.
+Builds are **signed with a Developer ID certificate and notarized by Apple**, so they open normally after download. Each release lists SHA-256 checksums for its archives.
 
 `arm64` and `x86_64` are separate builds, not a universal binary.
 
@@ -100,7 +100,7 @@ cd universal-display-magnet
 open "build/Universal Display Magnet.app"
 ```
 
-No third-party dependencies, package managers or build-time downloads. The build script compiles the app, assembles the bundle with its icon and license, and applies an ad-hoc signature with an identifier-based designated requirement, so macOS keeps the app's permissions across rebuilds.
+No third-party dependencies, package managers or build-time downloads. The build script compiles the app, assembles the bundle with its icon and license, and applies an ad-hoc signature with an identifier-based designated requirement, so macOS keeps the app's permissions across rebuilds. Releases set `SIGN_IDENTITY` and `NOTARY_PROFILE` for `scripts/package.sh` to sign with Developer ID, notarize and staple.
 
 ```sh
 ./scripts/test.sh              # unit tests: layout, snapping, identity, matching, sync, Universal Control geometry
