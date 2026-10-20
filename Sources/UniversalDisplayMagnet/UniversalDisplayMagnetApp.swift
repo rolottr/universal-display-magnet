@@ -19,8 +19,8 @@ struct UniversalDisplayMagnetApp: App {
     }
 }
 
-/// The app's menu bar menus (Universal Display Magnet is a regular app with a Dock icon;
-/// the status-bar panel is a shortcut on top of that).
+/// The app's menu bar menus, shown while its window is open (closed, it lives
+/// in the status-bar panel only).
 struct AppCommands: Commands {
     @ObservedObject var model: AppModel
 
@@ -92,7 +92,8 @@ enum MenuActions {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.regular)
+        // Opened by hand: Dock icon and window. Opened at login: menu bar only.
+        NSApp.setActivationPolicy(launchedAsLoginItem ? .accessory : .regular)
         if runDiagnostics() { return }
         if let dir = DemoRenderer.outputDirectory {
             DemoRenderer.prepareData()
@@ -106,9 +107,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         AppModel.shared.start()
         UpdateChecker.shared.startAutomaticChecks()
-        // Opened by hand: show the window. Opened at login: stay quietly
-        // in the Dock and menu bar.
+        observeAppWindows()
         if !launchedAsLoginItem { MainWindow.show() }
+    }
+
+    /// Like most menu bar apps: while a window is open the app has a Dock icon
+    /// and menus; once the last one closes it steps back to the menu bar (no
+    /// Dock icon, not in ⌘-Tab) and keeps running.
+    private func observeAppWindows() {
+        let center = NotificationCenter.default
+        center.addObserver(forName: NSWindow.didBecomeKeyNotification, object: nil, queue: .main) { note in
+            MainActor.assumeIsolated {
+                guard let window = note.object as? NSWindow, Self.isAppWindow(window),
+                    NSApp.activationPolicy() != .regular
+                else { return }
+                NSApp.setActivationPolicy(.regular)
+                // Coming back from the menu bar, the app must be active again for its menus to show.
+                NSApp.activate(ignoringOtherApps: true)
+            }
+        }
+        center.addObserver(forName: NSWindow.willCloseNotification, object: nil, queue: .main) { note in
+            MainActor.assumeIsolated {
+                guard let closing = note.object as? NSWindow, Self.isAppWindow(closing) else { return }
+                let othersOpen = NSApp.windows.contains { $0 !== closing && $0.isVisible && Self.isAppWindow($0) }
+                if !othersOpen { NSApp.setActivationPolicy(.accessory) }
+            }
+        }
+    }
+
+    /// The main and Save Workspace windows; not the menu bar panel, overlays or alerts.
+    private static func isAppWindow(_ window: NSWindow) -> Bool {
+        !(window is NSPanel) && !window.isSheet && window.styleMask.contains(.titled) && window.canBecomeMain
+    }
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        // Keep running for the menu bar, shortcuts, sync and window snapping.
+        false
     }
 
     private var launchedAsLoginItem: Bool {
@@ -336,6 +370,8 @@ enum MainWindow {
             w.setFrameAutosaveName("Universal Display MagnetMain")
             window = w
         }
+        // The app drops its Dock icon while no window is open; bring it back with the window.
+        NSApp.setActivationPolicy(.regular)
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }

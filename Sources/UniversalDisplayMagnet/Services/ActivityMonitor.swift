@@ -49,7 +49,7 @@ final class ActivityMonitor: ObservableObject {
     private static let historyHours = 6
     private static let limit = 3000
 
-    private static let predicate = """
+    private nonisolated static let predicate = """
         process == "UniversalControl" AND (eventMessage CONTAINS "Device Lost" \
         OR eventMessage CONTAINS "Device Found" OR eventMessage CONTAINS "Device Unavailable" \
         OR eventMessage CONTAINS "Device Available" OR eventMessage BEGINSWITH "Connections:" \

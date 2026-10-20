@@ -37,7 +37,7 @@ Universal Display Magnet fixes the arrangement once and puts it back every time.
 | **Universal Control activity and reset** | An **Activity** page shows, in plain words, what Universal Control does with your other Mac: Bluetooth signal dropouts, connections, arrangement changes and input it had to throw away. When it stops working, **Reset Universal Control** restarts its services on both Macs over your network and puts your arrangement back. |
 | **Wake the other Mac** | When this Mac wakes or you unlock it, your other Mac's display turns on too (Wake-on-LAN if it's fully asleep). While the other Mac's screens are asleep, **Wake Other Mac** appears in the menu bar. |
 | **Menu bar and Dock** | Snap buttons, Save Workspace and your workspaces (with previews, two per row) from the menu bar; workspaces in the Dock menu. |
-| **Mac integration** | Open at login, global shortcuts, a Dock icon and app menus, and a daily update check against this repository's releases. |
+| **Mac integration** | Open at login, global shortcuts, a Dock icon and app menus while its window is open, and a daily update check against this repository's releases. |
 
 ## Getting started
 
@@ -54,6 +54,8 @@ Universal Display Magnet fixes the arrangement once and puts it back every time.
 2. Put **Universal Display Magnet.app** in your Applications folder and open it.
 3. When asked, turn on Universal Display Magnet in **System Settings → Privacy & Security → Device Control and Data Access**, and allow **Local Network** access.
 4. Universal Display Magnet opens at login from then on. Change that under **Settings → General**.
+
+Closing the window keeps Universal Display Magnet running in the menu bar, without a Dock icon, so shortcuts, snapping, sync and wake keep working. Open the window again from the menu bar panel or by opening the app, or choose **Quit** there to stop it.
 
 To move windows back onto their Desktop, Universal Display Magnet uses the **Switch to Desktop 1…10** shortcuts (⌃1…⌃0). Turn them on with **Workspaces → Enable ⌃1…⌃0** if they're off.
 
