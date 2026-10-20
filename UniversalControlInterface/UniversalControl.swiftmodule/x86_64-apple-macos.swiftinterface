@@ -1,0 +1,70 @@
+// swift-interface-format-version: 1.0
+// swift-module-flags: -target x86_64-apple-macos14.0 -enable-library-evolution -swift-version 5 -module-name UniversalControl
+// Hand-written description of the private UniversalControl framework's
+// public Swift API (only what Universal Display Magnet uses). Signatures match the
+// framework's exported symbols on macOS 27.
+import CoreGraphics
+import Foundation
+import ObjectiveC
+import Swift
+
+@frozen public struct UniversalControlUUID {
+  public let rawValue: (Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8, Swift.UInt8)
+  public init(uuid: Foundation.UUID)
+  public var uuidValue: Foundation.UUID { get }
+  public var stringValue: Swift.String { get }
+}
+
+@frozen public struct UniversalControlDeviceID {
+  public var rawValue: UniversalControl.UniversalControlUUID
+  public init(uuid: Foundation.UUID)
+  public var uuidValue: Foundation.UUID { get }
+}
+
+@frozen public struct UniversalControlDisplayID {
+  public var deviceID: UniversalControl.UniversalControlDeviceID
+  public var displayUUID: UniversalControl.UniversalControlUUID
+  public init(deviceID: UniversalControl.UniversalControlDeviceID, displayUUID: UniversalControl.UniversalControlUUID)
+}
+
+@frozen public enum UniversalControlEdge {
+  case top
+  case left
+  case bottom
+  case right
+  public init?(intValue: Swift.Int)
+  public var intValue: Swift.Int { get }
+}
+
+public struct UniversalControlLink {
+  public init(display1: UniversalControl.UniversalControlDisplayID, display2: UniversalControl.UniversalControlDisplayID, edge: UniversalControl.UniversalControlEdge, fixedOffset1: Swift.UInt16, fixedOffset2: Swift.UInt16)
+  public var display1: UniversalControl.UniversalControlDisplayID { get }
+  public var display2: UniversalControl.UniversalControlDisplayID { get }
+  public var edge: UniversalControl.UniversalControlEdge { get }
+  public var fixedOffset1: Swift.UInt16 { get }
+  public var fixedOffset2: Swift.UInt16 { get }
+  public var description: Swift.String { get }
+}
+
+public struct UniversalControlConfiguration {
+  public struct GradedLink {
+    public var link: UniversalControl.UniversalControlLink { get }
+    public var timestamp: Swift.Double { get }
+  }
+  public init()
+  public init(data: Foundation.Data) throws
+  public func encoded() throws -> Foundation.Data
+  public func links() -> [UniversalControl.UniversalControlConfiguration.GradedLink]
+  public func replacing(links: [UniversalControl.UniversalControlLink]) -> UniversalControl.UniversalControlConfiguration
+  public func addingLinks(_ links: [UniversalControl.UniversalControlLink]) -> UniversalControl.UniversalControlConfiguration
+  public func findConflicts(_ link: UniversalControl.UniversalControlLink) -> [UniversalControl.UniversalControlLink]
+  public var digest: Foundation.Data { get }
+  public func prettyPrint() -> Swift.String
+}
+
+final public class UniversalControlPreferences : ObjectiveC.NSObject {
+  public static var shared: UniversalControl.UniversalControlPreferences { get }
+  final public var configuration: UniversalControl.UniversalControlConfiguration? { get set }
+  final public var configurationID: Foundation.Data? { get set }
+  final public var enabled: Swift.Bool { get set }
+}
