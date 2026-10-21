@@ -25,6 +25,10 @@ struct AppCommands: Commands {
     @ObservedObject var model: AppModel
 
     var body: some Commands {
+        // The app's own About page instead of the standard About panel.
+        CommandGroup(replacing: .appInfo) {
+            Button("About Universal Display Magnet") { MainWindow.show(.about) }
+        }
         CommandGroup(after: .appInfo) {
             Button("Check for Updates…") { Task { await UpdateChecker.shared.checkAndReport() } }
         }
@@ -293,7 +297,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 enum AppSection: String, CaseIterable, Identifiable {
     // Sidebar order.
-    case windows, snapping, displays, linked, sync, activity, settings
+    case windows, snapping, displays, linked, sync, activity, settings, about
     var id: String { rawValue }
 
     var title: String {
@@ -305,6 +309,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .sync: return "Macs & Sync"
         case .activity: return "Activity"
         case .settings: return "Settings"
+        case .about: return "About"
         }
     }
 
@@ -317,6 +322,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .sync: return "arrow.triangle.2.circlepath"
         case .activity: return "waveform.path.ecg"
         case .settings: return "gearshape"
+        case .about: return "info.circle"
         }
     }
 }

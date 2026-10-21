@@ -24,6 +24,7 @@ struct MainView: View {
                     case .sync: SyncView()
                     case .activity: ActivityView()
                     case .settings: SettingsView()
+                    case .about: AboutView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
