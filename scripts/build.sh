@@ -24,16 +24,22 @@ mkdir -p "$ROOT/build"
 # whose plugin ships only with Xcode), so the Command Line Tools build it
 # with any SDK. Override with SDKROOT=... if needed.
 export SDKROOT=${SDKROOT:-$(xcrun --sdk macosx --show-sdk-path)}
-ARCH_FLAGS=()
-for arch in $ARCHS; do ARCH_FLAGS+=(--arch "$arch"); done
-echo "==> swift build ($CONFIG, $ARCHS) with SDK $SDKROOT"
-swift build -c "$CONFIG" "${ARCH_FLAGS[@]}" --product UniversalDisplayMagnet
-BIN=$(swift build -c "$CONFIG" "${ARCH_FLAGS[@]}" --show-bin-path)
+# One build per architecture, joined with lipo: SwiftPM's multi-arch build
+# needs Xcode's build system on older toolchains. Each binary is copied out
+# right away, since newer toolchains reuse one output folder for every arch.
+SLICES="$ROOT/build/slices"
+rm -rf "$SLICES"
+mkdir -p "$SLICES"
+for arch in $ARCHS; do
+  echo "==> swift build ($CONFIG, $arch) with SDK $SDKROOT"
+  swift build -c "$CONFIG" --arch "$arch" --product UniversalDisplayMagnet
+  cp "$(swift build -c "$CONFIG" --arch "$arch" --show-bin-path)/UniversalDisplayMagnet" "$SLICES/$arch"
+done
 
 echo "==> Assembling bundle"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN/UniversalDisplayMagnet" "$APP/Contents/MacOS/UniversalDisplayMagnet"
+lipo -create "$SLICES"/* -output "$APP/Contents/MacOS/UniversalDisplayMagnet"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 plutil -replace CFBundleVersion -string "$(date +%Y%m%d%H%M)" "$APP/Contents/Info.plist"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE"
