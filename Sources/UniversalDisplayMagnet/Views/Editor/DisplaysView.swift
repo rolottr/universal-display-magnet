@@ -40,7 +40,9 @@ struct DisplaysView: View {
                     .font(.system(size: 10, weight: .medium)).tracking(1.2).foregroundStyle(.secondary)
                 Spacer()
                 Button {
-                    if let name = Prompt.text("Save arrangement", message: "Name this arrangement.", defaultValue: suggestedName)
+                    if let name = Prompt.text(
+                        String(localized: "Save arrangement"), message: String(localized: "Name this arrangement."),
+                        defaultValue: suggestedName)
                     {
                         save(as: name, replacing: nil)
                     }
@@ -66,7 +68,8 @@ struct DisplaysView: View {
     }
 
     private var suggestedName: String {
-        model.profiles(forSetup: setupKey).isEmpty ? "My Setup" : "Arrangement \(model.profiles(forSetup: setupKey).count + 1)"
+        let count = model.profiles(forSetup: setupKey).count
+        return count == 0 ? String(localized: "My Setup") : String(localized: "Arrangement \(count + 1)")
     }
 
     private func save(as name: String, replacing: ArrangementProfile?) {
@@ -112,7 +115,7 @@ private struct ProfileCard: View {
                     Toggle("Restore resolutions", isOn: binding(\.restoreModes))
                     Divider()
                     Button("Rename…") {
-                        if let n = Prompt.text("Rename arrangement", defaultValue: profile.name) {
+                        if let n = Prompt.text(String(localized: "Rename arrangement"), defaultValue: profile.name) {
                             var p = profile
                             p.name = n
                             model.update(p)
@@ -250,10 +253,10 @@ struct EditorPanel: View {
 
     private var chip: String {
         if let id = editor.selected, let item = editor.item(id) {
-            return "\(item.detail) · at \(item.rect.x), \(item.rect.y)"
+            return String(localized: "\(item.detail) · at \(item.rect.x), \(item.rect.y)")
         }
         let n = editor.items.count
-        return "\(n) display\(n == 1 ? "" : "s")" + (editor.profile.map { " · \($0.name)" } ?? "")
+        return String(localized: "\(n) displays") + (editor.profile.map { " · \($0.name)" } ?? "")
     }
 
     private var targetPicker: some View {
@@ -269,7 +272,7 @@ struct EditorPanel: View {
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: editor.isRemote ? "laptopcomputer" : "desktopcomputer")
-                Text(editor.isRemote ? title : "This Mac")
+                editor.isRemote ? Text(title) : Text("This Mac")
                 Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
             }
             .font(.system(size: 11, weight: .medium))
@@ -323,10 +326,12 @@ struct EditorPanel: View {
     }
 
     private var hint: String {
-        if editor.items.count < 2 { return "Connect another display to arrange." }
-        if !editor.isValid { return "Displays must touch without overlapping." }
-        if editor.selected != nil { return "Drag to slide along an edge (⌥ for free) · arrows place another display · ←→↑↓ nudge" }
-        return "Click a display to select it, drag it anywhere — it snaps flush to its neighbours."
+        if editor.items.count < 2 { return String(localized: "Connect another display to arrange.") }
+        if !editor.isValid { return String(localized: "Displays must touch without overlapping.") }
+        if editor.selected != nil {
+            return String(localized: "Drag to slide along an edge (⌥ for free) · arrows place another display · ←→↑↓ nudge")
+        }
+        return String(localized: "Click a display to select it, drag it anywhere — it snaps flush to its neighbours.")
     }
 
     private func applyPressed() {
@@ -346,7 +351,7 @@ struct EditorPanel: View {
         let device = editor.isRemote ? model.devices.first { $0.deviceID == nav.editorDevice } : nil
         let existing = editor.profile.flatMap { p in model.arrangements.first { $0.id == p.id } }
         model.saveArrangement(
-            name: existing?.name ?? "My Setup", placements: editor.placements, setupKey: device?.setupKey, device: device,
+            name: existing?.name ?? String(localized: "My Setup"), placements: editor.placements, setupKey: device?.setupKey, device: device,
             autoApply: existing?.autoApply ?? true, restoreModes: existing?.restoreModes ?? false, replacing: existing)
         editor.load(device: nav.editorDevice, model: model)
     }
@@ -390,16 +395,24 @@ private struct Inspector: View {
 
     private var identityLine: String {
         let i = item.placement.identity
-        let serial = i.alphanumericSerial ?? (i.serial != 0 ? String(i.serial) : "no serial")
+        let serial = i.alphanumericSerial ?? (i.serial != 0 ? String(i.serial) : String(localized: "no serial"))
         let mode = item.placement.mode?.label ?? item.detail
         return "\(Vendor.code(i.vendor)) · \(serial) · \(mode)"
+    }
+
+    private func alignHelp(_ a: EdgeAlignment) -> LocalizedStringKey {
+        switch a {
+        case .start: return "Line up the top or left edges with its neighbour"
+        case .center: return "Center on its neighbour"
+        case .end: return "Line up the bottom or right edges with its neighbour"
+        }
     }
 
     private func alignButton(_ a: EdgeAlignment, _ symbol: String) -> some View {
         Button {
             editor.align(item.id, a)
         } label: { Image(systemName: symbol) }
-        .help("Align \(a.rawValue) with its neighbour")
+        .help(alignHelp(a))
     }
 }
 

@@ -2,13 +2,14 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var model: AppModel
+    @StateObject private var language = ViewState(AppLanguage.override)
 
     var body: some View {
         Form {
             Section("Displays") {
                 Toggle("Re-apply the saved arrangement when displays connect or macOS moves them", isOn: $model.settings.autoApplyArrangements)
                 Stepper(value: $model.settings.snapThreshold, in: 0...400, step: 8) {
-                    LabeledContent("Snap alignment strength", value: "\(model.settings.snapThreshold) pt")
+                    LabeledContent("Snap alignment strength", value: String(localized: "\(model.settings.snapThreshold) pt"))
                 }
             }
 
@@ -19,7 +20,7 @@ struct SettingsView: View {
                 Toggle("Keep an automatic snapshot of window positions", isOn: $model.settings.autosaveWindows)
                 if model.settings.autosaveWindows {
                     Stepper(value: $model.settings.autosaveMinutes, in: 1...30) {
-                        LabeledContent("Snapshot every", value: "\(model.settings.autosaveMinutes) min")
+                        LabeledContent("Snapshot every", value: String(localized: "\(model.settings.autosaveMinutes) min"))
                     }
                 }
                 Toggle("Move windows back to their Desktop", isOn: $model.settings.moveBetweenDesktops)
@@ -41,9 +42,29 @@ struct SettingsView: View {
                     isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
                 Toggle("Global shortcuts", isOn: $model.settings.hotkeysEnabled)
                 if model.settings.hotkeysEnabled {
-                    LabeledContent("⌃⌥⌘S", value: "Quick-save windows")
-                    LabeledContent("⌃⌥⌘R", value: "Restore windows")
-                    LabeledContent("⌃⌥⌘D", value: "Re-apply / snap displays")
+                    LabeledContent("⌃⌥⌘S", value: String(localized: "Quick-save windows"))
+                    LabeledContent("⌃⌥⌘R", value: String(localized: "Restore windows"))
+                    LabeledContent("⌃⌥⌘D", value: String(localized: "Re-apply / snap displays"))
+                }
+            }
+
+            Section("Language") {
+                Picker("Language", selection: $language.value) {
+                    Text("System (\(AppLanguage.name(of: AppLanguage.system)))").tag(String?.none)
+                    Divider()
+                    ForEach(AppLanguage.available, id: \.self) { Text(verbatim: AppLanguage.name(of: $0)).tag(Optional($0)) }
+                }
+                .onChange(of: language.value) { _, value in AppLanguage.override = value }
+                if (language.value ?? AppLanguage.system) != AppLanguage.current {
+                    HStack {
+                        Text("Universal Display Magnet switches to \(AppLanguage.name(of: language.value ?? AppLanguage.system)) when it restarts.")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Restart Now") { AppLanguage.relaunch() }
+                    }
+                } else {
+                    Text("Universal Display Magnet follows the language of your Mac unless you pick another one here.")
+                        .foregroundStyle(.secondary)
                 }
             }
 

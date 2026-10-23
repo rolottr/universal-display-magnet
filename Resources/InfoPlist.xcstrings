@@ -1,0 +1,230 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSAccessibilityUsageDescription" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet vrací okna na monitor a plochu, kam patří, a přichytává okna do polovin a čtvrtin obrazovky."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet bewegt Fenster zurück auf den Bildschirm und Schreibtisch, auf den sie gehören, und lässt Fenster in Hälften und Vierteln einrasten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet moves windows back to the display and Desktop they belong on, and snaps windows to halves and quarters."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet devuelve las ventanas a la pantalla y al Escritorio que les corresponden, y las acopla a mitades y cuartos de pantalla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet replace les fenêtres sur le moniteur et le Bureau auxquels elles appartiennent, et les aimante en moitiés et en quarts d’écran."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Universal Display Magnet visszahelyezi az ablakokat arra a kijelzőre és íróasztalra, ahová tartoznak, és az ablakokat a képernyő felére vagy negyedére illeszti."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet riporta le finestre sul monitor e sulla Scrivania a cui appartengono e le aggancia a metà e quarti di schermo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnetは、ウインドウを元のディスプレイとデスクトップに戻し、ウインドウを画面の半分や4分の1のサイズにスナップします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet은 윈도우를 원래 디스플레이와 데스크탑으로 되돌리고, 윈도우를 화면의 절반이나 4분의 1 크기로 스냅합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet zet vensters terug op het beeldscherm en bureaublad waar ze horen, en lijnt vensters uit op helften en kwarten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet przenosi okna z powrotem na wyświetlacz i biurko, do których należą, oraz przyciąga okna do połówek i ćwiartek ekranu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Universal Display Magnet devolve as janelas à tela e à Mesa a que pertencem e encaixa janelas em metades e quartos da tela."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet возвращает окна на тот дисплей и рабочий стол, где они должны быть, и привязывает окна к половинам и четвертям экрана."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet flyttar tillbaka fönster till den skärm och det skrivbord där de hör hemma, och fäster fönster i halvor och fjärdedelar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet, pencereleri ait oldukları ekrana ve Masaüstüne geri taşır ve pencereleri ekranın yarılarına ve çeyreklerine yaslar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet повертає вікна на той дисплей і робочий стіл, де вони мають бути, і прив’язує вікна до половин і чвертей екрана."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet 会将窗口移回其所属的显示器和桌面，并将窗口吸附到半屏和四分之一屏。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet 會將視窗移回其所屬的顯示器和桌面，並將視窗貼齊至半個或四分之一個螢幕。"
+          }
+        }
+      }
+    },
+    "NSLocalNetworkUsageDescription" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet hledá vaše další Macy v místní síti, aby synchronizoval uspořádání a pracovní prostory bez jakékoli cloudové služby."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet findet Ihre anderen Macs im lokalen Netzwerk, um Anordnungen und Arbeitsbereiche synchron zu halten – ganz ohne Cloud-Dienst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet finds your other Macs on the local network to keep arrangements and workspaces in sync, without any cloud service."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet busca sus otros Mac en la red local para mantener sincronizados disposiciones y espacios de trabajo, sin ningún servicio en la nube."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet recherche vos autres Mac sur le réseau local pour synchroniser dispositions et espaces de travail, sans aucun service cloud."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Universal Display Magnet megkeresi a többi Macedet a helyi hálózaton, hogy felhőszolgáltatás nélkül szinkronban tartsa az elrendezéseket és a munkaterületeket."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet cerca gli altri tuoi Mac sulla rete locale per mantenere sincronizzati disposizioni e spazi di lavoro, senza alcun servizio cloud."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnetは、配置とワークスペースを同期するためにローカルネットワーク上のほかのMacを検出します。クラウドサービスは使用しません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet은 배열과 작업 공간을 동기화하기 위해 로컬 네트워크에서 다른 Mac을 찾습니다. 클라우드 서비스는 사용하지 않습니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet zoekt uw andere Macs op het lokale netwerk om rangschikkingen en werkruimten gesynchroniseerd te houden, zonder clouddienst."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet wyszukuje twoje inne Maki w sieci lokalnej, aby synchronizować rozmieszczenia i obszary robocze bez żadnej usługi w chmurze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Universal Display Magnet encontra seus outros Macs na rede local para manter as disposições e os espaços de trabalho sincronizados, sem nenhum serviço em nuvem."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet ищет ваши другие Mac в локальной сети, чтобы синхронизировать расположения и рабочие пространства без каких-либо облачных сервисов."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet hittar dina andra Mac-datorer i det lokala nätverket för att hålla arrangemang och arbetsytor synkade, utan någon molntjänst."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet, düzenleri ve çalışma alanlarını herhangi bir bulut hizmeti olmadan eşzamanlı tutmak için diğer Mac'lerini yerel ağda bulur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet шукає ваші інші Mac у локальній мережі, щоб синхронізувати розташування й робочі простори без жодних хмарних сервісів."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet 会在本地网络上查找您的其他 Mac，以保持排列和工作区同步，无需任何云服务。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Universal Display Magnet 會在區域網路上尋找您的其他 Mac，以保持排列和工作區同步，無須任何雲端服務。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

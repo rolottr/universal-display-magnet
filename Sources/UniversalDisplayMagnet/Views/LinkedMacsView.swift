@@ -154,7 +154,7 @@ struct LinkedMacsView: View {
                     .gesture(localDragGesture(d, r: r, t: t, remoteOffset: offset, placedTheirs: placedTheirs))
                 }
                 groupLabel(
-                    "\(model.deviceName) (this Mac)", box: LayoutEngine.boundingBox(localDisplays.map(\.frame)), t: t)
+                    String(localized: "\(model.deviceName) (this Mac)"), box: LayoutEngine.boundingBox(localDisplays.map(\.frame)), t: t)
                 // The other Mac: one rigid, draggable group.
                 ForEach(Array(r.status.displays.enumerated()), id: \.offset) { i, p in
                     let rect = t.rect(p.frame.offsetBy(dx: offset.x, dy: offset.y))
@@ -287,9 +287,10 @@ struct LinkedMacsView: View {
     private func linkCard(_ r: (status: DeviceStatus, uc: String)) -> some View {
         let link = me.flatMap { model.universalControl?.link(from: r.uc, to: $0) }
         let theirName = { (uuid: String) in
-            r.status.displays.first { $0.identity.uuid == uuid }?.identity.name ?? "display"
+            r.status.displays.first { $0.identity.uuid == uuid }?.identity.name ?? String(localized: "display")
         }
-        let myName = { (uuid: String) in model.displays.first { $0.identity.uuid == uuid }?.identity.name ?? "display" }
+        let myName = { (uuid: String) in model.displays.first { $0.identity.uuid == uuid }?.identity.name ?? String(localized: "display")
+        }
         return HStack(spacing: 12) {
             Image(systemName: link == nil ? "link.badge.plus" : "link").foregroundStyle(.blue).font(.title3)
             VStack(alignment: .leading, spacing: 2) {
@@ -337,7 +338,7 @@ struct LinkedMacsView: View {
                 Text(
                     others.isEmpty
                         ? "Restarts the services Universal Control runs on, on this Mac, then puts your arrangement back if it was lost. Open Universal Display Magnet on the other Mac to reset it too."
-                        : "Restarts the services Universal Control runs on, on this Mac and on \(others.joined(separator: " and ")) over your network, then puts your arrangement back if it was lost. Takes about 10 seconds."
+                        : "Restarts the services Universal Control runs on, on this Mac and on \(others.formatted(.list(type: .and))) over your network, then puts your arrangement back if it was lost. Takes about 10 seconds."
                 )
                 .font(.caption).foregroundStyle(.secondary)
             }

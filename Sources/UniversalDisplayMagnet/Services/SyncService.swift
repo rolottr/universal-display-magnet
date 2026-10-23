@@ -185,9 +185,9 @@ final class SyncService {
             guard let self else { return }
             switch state {
             case .ready:
-                self.log("Listening on port \(listener.port?.rawValue ?? 0)")
+                self.log(String(localized: "Listening on port \(Int(listener.port?.rawValue ?? 0))"))
             case .failed(let error):
-                self.log("Listener failed: \(error)")
+                self.log(String(localized: "Listener failed: \(error.localizedDescription)"))
                 listener.cancel()
                 guard self.listener === listener else { return }
                 if port != nil {
@@ -221,7 +221,7 @@ final class SyncService {
         }
         browser.stateUpdateHandler = { [weak self, weak browser] state in
             guard let self, case .failed(let error) = state else { return }
-            self.log("Discovery failed: \(error); retrying")
+            self.log(String(localized: "Discovery failed: \(error.localizedDescription); retrying"))
             browser?.cancel()
             self.queue.asyncAfter(deadline: .now() + 10) { [weak self] in
                 guard let self, !self.secrets.isEmpty, self.browser === browser else { return }
@@ -303,7 +303,7 @@ final class SyncService {
 
     private func drop(_ peer: PeerConnection) {
         guard connections.removeValue(forKey: ObjectIdentifier(peer)) != nil else { return }
-        if let id = peer.peerID { log("Disconnected from \(peer.peerName ?? id)") }
+        if let id = peer.peerID { log(String(localized: "Disconnected from \(peer.peerName ?? id)")) }
         publishPeers()
     }
 
@@ -325,11 +325,15 @@ final class SyncService {
                         }
                     }
                 } catch SyncFrameError.stale {
-                    self.log("Ignoring \(peer.peerName ?? peer.endpointDescription): its clock is more than 15 minutes off")
+                    self.log(
+                        String(
+                            localized:
+                                "Ignoring \(peer.peerName ?? peer.endpointDescription): its clock is more than 15 minutes off"))
                     peer.connection.cancel()
                     return
                 } catch {
-                    self.log("Rejected data from \(peer.peerName ?? peer.endpointDescription): not one of your Macs")
+                    self.log(
+                        String(localized: "Rejected data from \(peer.peerName ?? peer.endpointDescription): not one of your Macs"))
                     peer.connection.cancel()
                     return
                 }
@@ -379,7 +383,7 @@ final class SyncService {
                 (keepOther ? peer : other).connection.cancel()
                 if keepOther { return }
             }
-            log("Connected to \(hello.deviceName)")
+            log(String(localized: "Connected to \(hello.deviceName)"))
             if let asleep = envelope.asleep {
                 let id = hello.deviceID
                 DispatchQueue.main.async { self.onPeerAsleep?(id, asleep) }

@@ -64,7 +64,7 @@ struct ActivityView: View {
         }
     }
 
-    private func tile(_ value: String, _ label: String, _ color: Color) -> some View {
+    private func tile(_ value: String, _ label: LocalizedStringKey, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value).font(.title.weight(.semibold).monospacedDigit()).foregroundStyle(color)
             Text(label).font(.caption).foregroundStyle(.secondary)
@@ -134,40 +134,41 @@ struct ActivityView: View {
         let (icon, color, text): (String, Color, String)
         switch e.kind {
         case .signalLost:
-            (icon, color, text) = ("antenna.radiowaves.left.and.right.slash", .orange, "Lost \(name)'s Bluetooth signal")
+            (icon, color, text) = ("antenna.radiowaves.left.and.right.slash", .orange, String(localized: "Lost \(name)'s Bluetooth signal"))
         case .signalFound:
-            (icon, color, text) = ("antenna.radiowaves.left.and.right", .secondary, "Found \(name)'s Bluetooth signal again")
+            (icon, color, text) = ("antenna.radiowaves.left.and.right", .secondary, String(localized: "Found \(name)'s Bluetooth signal again"))
         case .unavailable:
             (icon, color, text) = (
-                "exclamationmark.triangle.fill", .red, "\(name) no longer counts as nearby: Universal Control disconnects it"
+                "exclamationmark.triangle.fill", .red,
+                String(localized: "\(name) no longer counts as nearby: Universal Control disconnects it")
             )
         case .available:
-            (icon, color, text) = ("checkmark.circle", .green, "\(name) is nearby again")
+            (icon, color, text) = ("checkmark.circle", .green, String(localized: "\(name) is nearby again"))
         case .connected:
-            (icon, color, text) = ("link", .green, "Connected to \(name): keyboard and mouse shared")
+            (icon, color, text) = ("link", .green, String(localized: "Connected to \(name): keyboard and mouse shared"))
         case .disconnected:
-            (icon, color, text) = ("minus.circle", .secondary, "Disconnected from \(name)")
+            (icon, color, text) = ("minus.circle", .secondary, String(localized: "Disconnected from \(name)"))
         case .pointerOut:
-            (icon, color, text) = ("cursorarrow.motionlines", .blue, "Pointer crossing to \(name)")
+            (icon, color, text) = ("cursorarrow.motionlines", .blue, String(localized: "Pointer crossing to \(name)"))
         case .pointerIn:
-            (icon, color, text) = ("cursorarrow.motionlines", .blue, "\(name)'s pointer crossing to this Mac")
+            (icon, color, text) = ("cursorarrow.motionlines", .blue, String(localized: "\(name)'s pointer crossing to this Mac"))
         case .arrangement(let links, let fromOtherMac):
-            let by = fromOtherMac ? name : "This Mac"
+            let by = fromOtherMac ? name : String(localized: "This Mac")
             if links == 0 {
                 (icon, color, text) = (
                     "rectangle.3.group", .orange,
-                    "\(by) cleared the arrangement: Universal Control now places the Macs itself"
+                    String(localized: "\(by) cleared the arrangement: Universal Control now places the Macs itself")
                 )
             } else {
                 (icon, color, text) = (
                     "rectangle.3.group", .secondary,
-                    "\(by) changed the arrangement (\(links) connection\(links == 1 ? "" : "s"))"
+                    String(localized: "\(by) changed the arrangement (\(links) connections)")
                 )
             }
         case .inputDropped:
             (icon, color, text) = (
                 "keyboard", .red,
-                "Threw away \(e.count) keyboard/mouse event\(e.count == 1 ? "" : "s"): the connection was gone"
+                String(localized: "Threw away \(e.count) keyboard/mouse events: the connection was gone")
             )
         }
         return Row(id: e.id, date: e.date, icon: icon, color: color, text: text, problem: e.isProblem)
@@ -175,10 +176,10 @@ struct ActivityView: View {
 
     /// Universal Control id prefix → the Mac's name.
     private func macName(_ prefix: String?) -> String {
-        guard let prefix else { return "The other Mac" }
-        if model.universalControl?.selfDevice?.hasPrefix(prefix) == true { return "This Mac" }
+        guard let prefix else { return String(localized: "The other Mac") }
+        if model.universalControl?.selfDevice?.hasPrefix(prefix) == true { return String(localized: "This Mac") }
         let match = model.devices.first { $0.deviceID != model.deviceID && model.ucDevice(for: $0)?.hasPrefix(prefix) == true }
-        return match?.name ?? "The other Mac"
+        return match?.name ?? String(localized: "The other Mac")
     }
 
     private func timeLabel(_ date: Date) -> String {

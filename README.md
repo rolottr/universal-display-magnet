@@ -37,6 +37,7 @@ Universal Display Magnet fixes the arrangement once and puts it back every time.
 | **Universal Control activity and reset** | An **Activity** page shows, in plain words, what Universal Control does with your other Mac: Bluetooth signal dropouts, connections, arrangement changes and input it had to throw away. When it stops working, **Reset Universal Control** restarts its services on both Macs over your network and puts your arrangement back. |
 | **Wake the other Mac** | When this Mac wakes or you unlock it, your other Mac's display turns on too (Wake-on-LAN if it's fully asleep). While the other Mac's screens are asleep, **Wake Other Mac** appears in the menu bar. |
 | **Menu bar and Dock** | Snap buttons, Save Workspace and your workspaces (with previews, two per row) from the menu bar; workspaces in the Dock menu. |
+| **18 languages** | English, Čeština, Deutsch, Español, Français, Italiano, Magyar, Nederlands, Polski, Português (Brasil), Svenska, Türkçe, Русский, Українська, 日本語, 한국어, 简体中文 and 繁體中文. It follows your Mac's language, or the one picked in **Settings → Language**. |
 | **Mac integration** | Open at login, global shortcuts, a Dock icon and app menus while its window is open, and a daily update check against this repository's releases. |
 
 ## Getting started
@@ -100,7 +101,7 @@ cd universal-display-magnet
 open "build/Universal Display Magnet.app"
 ```
 
-No third-party dependencies, package managers or build-time downloads. The build script compiles the app, assembles the bundle with its icon and license, and applies an ad-hoc signature with an identifier-based designated requirement, so macOS keeps the app's permissions across rebuilds. Releases set `SIGN_IDENTITY` and `NOTARY_PROFILE` for `scripts/package.sh` to sign with Developer ID, notarize and staple.
+No third-party dependencies, package managers or build-time downloads. The build script compiles the app, assembles the bundle with its icon, translations and license, and applies an ad-hoc signature with an identifier-based designated requirement, so macOS keeps the app's permissions across rebuilds. Releases set `SIGN_IDENTITY` and `NOTARY_PROFILE` for `scripts/package.sh` to sign with Developer ID, notarize and staple.
 
 ```sh
 ./scripts/test.sh              # unit tests: layout, snapping, identity, matching, sync, Universal Control geometry
@@ -109,6 +110,10 @@ No third-party dependencies, package managers or build-time downloads. The build
 CONFIG=debug ./scripts/build.sh
 ARCH=x86_64 ./scripts/build.sh # Intel build on Apple silicon
 ```
+
+### Translations
+
+Strings live in `Resources/Localizable.xcstrings` (and `InfoPlist.xcstrings` for the permission prompts), Xcode's string catalog format. The Command Line Tools can't compile catalogs, so `scripts/strings.swift` turns them into `.strings` and `.stringsdict` files when the app is built, and rejects a translation whose placeholders don't match its English text. After changing text in the code, `./scripts/update-strings.sh` adds the new strings to the catalog and marks removed ones as stale.
 
 ### Universal Control interface
 

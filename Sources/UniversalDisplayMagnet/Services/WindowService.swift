@@ -33,11 +33,11 @@ struct RestoreReport {
     var notes: [String] = []
 
     var summary: String {
-        var parts = ["Restored \(moved) window\(moved == 1 ? "" : "s")"]
-        if alreadyInPlace > 0 { parts.append("\(alreadyInPlace) already in place") }
-        if desktopMoves > 0 { parts.append("\(desktopMoves) moved to their Desktop") }
-        if unmatched > 0 { parts.append("\(unmatched) not open") }
-        if desktopFailures > 0 { parts.append("\(desktopFailures) couldn't change Desktop") }
+        var parts = [String(localized: "Restored \(moved) windows")]
+        if alreadyInPlace > 0 { parts.append(String(localized: "\(alreadyInPlace) already in place")) }
+        if desktopMoves > 0 { parts.append(String(localized: "\(desktopMoves) moved to their Desktop")) }
+        if unmatched > 0 { parts.append(String(localized: "\(unmatched) not open")) }
+        if desktopFailures > 0 { parts.append(String(localized: "\(desktopFailures) couldn't change Desktop")) }
         return parts.joined(separator: " · ")
     }
 }
@@ -316,7 +316,7 @@ enum WindowService {
             var launched: [String] = []
             for id in missing {
                 guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) else { continue }
-                progress("Opening \(url.deletingPathExtension().lastPathComponent)…")
+                progress(String(localized: "Opening \(url.deletingPathExtension().lastPathComponent)…"))
                 let config = NSWorkspace.OpenConfiguration()
                 config.activates = false
                 NSWorkspace.shared.openApplication(at: url, configuration: config)
@@ -339,7 +339,7 @@ enum WindowService {
             if !missing.isEmpty { Thread.sleep(forTimeInterval: 1.5) }
         }
 
-        progress("Finding windows…")
+        progress(String(localized: "Finding windows…"))
         let startSpaces = SpaceService.snapshot()
 
         // Windows already exactly where the layout has them are left alone.
@@ -398,7 +398,7 @@ enum WindowService {
                 report.alreadyInPlace += 1
                 continue
             }
-            progress("Moving \(window.appName)…")
+            progress(String(localized: "Moving \(window.appName)…"))
             setFrame(window.element, target, pid: window.pid)
             if saved.isFullscreen && !window.isFullscreen && confident {
                 Thread.sleep(forTimeInterval: 0.2)
@@ -471,7 +471,7 @@ enum WindowService {
             .sorted { $0.0 < $1.0 }
         var found: [LiveWindow] = []
         for (number, windows) in bySpace {
-            progress("Looking for windows on Desktop \(number)…")
+            progress(String(localized: "Looking for windows on Desktop \(number)…"))
             _ = SpaceService.switchToDesktop(number)
             Thread.sleep(forTimeInterval: SpaceService.switchDelay)
             let numbers = Set(windows.map(\.number))
@@ -515,7 +515,7 @@ enum WindowService {
         let available = SpaceService.availableDesktopShortcuts()
         for move in moves {
             let w = move.window
-            progress("Moving \(w.appName) to Desktop \(move.saved.spaceIndex ?? 0)…")
+            progress(String(localized: "Moving \(w.appName) to Desktop \(move.saved.spaceIndex ?? 0)…"))
             var spaces = SpaceService.snapshot()
 
             // 1. Make the window visible: switch to the Desktop it's on now.

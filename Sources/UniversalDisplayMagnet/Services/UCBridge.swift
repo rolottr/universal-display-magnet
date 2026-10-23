@@ -41,10 +41,15 @@ enum UCBridge {
 
         var errorDescription: String? {
             switch self {
-            case .unavailable: return "Universal Control isn't available on this Mac"
-            case .noConfiguration: return "Universal Control has no arrangement yet; link the Macs once in System Settings › Displays"
-            case .badID(let s): return "Unexpected Universal Control id \(s)"
-            case .verificationFailed: return "Refused to save: the new arrangement didn't read back correctly (macOS may have changed Universal Control)"
+            case .unavailable: return String(localized: "Universal Control isn't available on this Mac")
+            case .noConfiguration:
+                return String(
+                    localized: "Universal Control has no arrangement yet; link the Macs once in System Settings › Displays")
+            case .badID(let s): return String(localized: "Unexpected Universal Control id \(s)")
+            case .verificationFailed:
+                return String(
+                    localized:
+                        "Refused to save: the new arrangement didn't read back correctly (macOS may have changed Universal Control)")
             }
         }
     }

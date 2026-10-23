@@ -108,7 +108,8 @@ struct LayoutPreview: View {
             guard let key = e.page, seen[key] == nil || e.window.isFullscreen else { continue }
             let label =
                 e.window.isFullscreen
-                ? "\(e.window.appName) (full screen)" : "Desktop \(e.window.spaceIndex.map(String.init) ?? "?")"
+                ? String(localized: "\(e.window.appName) (full screen)")
+                : e.window.spaceIndex.map { String(localized: "Desktop \($0)") } ?? "?"
             seen[key] = Page(key: key, label: label, fullscreen: e.window.isFullscreen)
         }
         return seen.values.sorted { $0.key < $1.key }

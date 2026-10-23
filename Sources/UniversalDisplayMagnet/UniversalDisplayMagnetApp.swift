@@ -70,7 +70,7 @@ struct AppCommands: Commands {
             Button("Edit Arrangement…") { MainWindow.show(.displays) }
                 .keyboardShortcut("3")
             Button("Save Current Arrangement…") {
-                if let name = Prompt.text("Save arrangement", defaultValue: "My Setup") { model.saveArrangement(name: name) }
+                if let name = Prompt.text(String(localized: "Save arrangement"), defaultValue: String(localized: "My Setup")) { model.saveArrangement(name: name) }
             }
             Button("Arrange Displays Across Macs…") { MainWindow.show(.linked) }
                 .keyboardShortcut("4")
@@ -221,18 +221,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
         let model = AppModel.shared
         let menu = NSMenu()
-        menu.addItem(DockItem("Save Workspace…") { MenuActions.saveWorkspace() })
+        menu.addItem(DockItem(String(localized: "Save Workspace…")) { MenuActions.saveWorkspace() })
         let workspaces = model.workspaces
         if !workspaces.isEmpty {
             menu.addItem(.separator())
             for w in workspaces.prefix(8) {
-                menu.addItem(DockItem("Restore “\(w.name)”") { model.restoreWorkspace(w) })
+                menu.addItem(DockItem(String(localized: "Restore “\(w.name)”")) { model.restoreWorkspace(w) })
             }
         }
         menu.addItem(.separator())
-        menu.addItem(DockItem("Restore Latest Windows") { model.quickRestoreWindows() })
-        menu.addItem(DockItem("Wake Other Mac") { model.wakeOtherMacs() })
-        menu.addItem(DockItem("Snap Displays Together") { model.snapAllTogether() })
+        menu.addItem(DockItem(String(localized: "Restore Latest Windows")) { model.quickRestoreWindows() })
+        menu.addItem(DockItem(String(localized: "Wake Other Mac")) { model.wakeOtherMacs() })
+        menu.addItem(DockItem(String(localized: "Snap Displays Together")) { model.snapAllTogether() })
         return menu
     }
 
@@ -354,7 +354,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     case windows, snapping, displays, linked, sync, activity, settings, about
     var id: String { rawValue }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .displays: return "Displays"
         case .linked: return "Universal Control"
@@ -458,13 +458,13 @@ extension NSWindow {
 /// Small modal text prompt (names for profiles and layouts).
 @MainActor
 enum Prompt {
-    static func text(_ title: String, message: String = "", defaultValue: String = "", confirm: String = "Save") -> String? {
+    static func text(_ title: String, message: String = "", defaultValue: String = "", confirm: String = String(localized: "Save")) -> String? {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = message
         alert.addButton(withTitle: confirm)
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: String(localized: "Cancel"))
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 280, height: 24))
         field.stringValue = defaultValue
         alert.accessoryView = field
@@ -480,7 +480,7 @@ enum Prompt {
         alert.messageText = title
         alert.informativeText = message
         alert.addButton(withTitle: confirm)
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: String(localized: "Cancel"))
         return alert.runModal() == .alertFirstButtonReturn
     }
 }

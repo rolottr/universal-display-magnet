@@ -28,7 +28,7 @@ struct AboutView: View {
                 LabeledContent("Version", value: AppInfo.version)
                 LabeledContent("Build", value: AppInfo.build)
                 LabeledContent("System", value: "\(AppInfo.system) · \(AppInfo.architecture)")
-                LabeledContent("License", value: "MIT, free and open source")
+                LabeledContent("License", value: String(localized: "MIT, free and open source"))
                 LabeledContent("For bug reports") {
                     Button(copied.value ? "Copied" : "Copy Version Info") { copy() }
                         .help("Copies one line with the version, build and system.")
@@ -57,7 +57,7 @@ struct AboutView: View {
         .formStyle(.grouped)
     }
 
-    private func link(_ title: String, symbol: String, _ url: URL) -> some View {
+    private func link(_ title: LocalizedStringKey, symbol: String, _ url: URL) -> some View {
         Button { NSWorkspace.shared.open(url) } label: {
             Label(title, systemImage: symbol)
         }
@@ -65,7 +65,7 @@ struct AboutView: View {
         .help(url.absoluteString)
     }
 
-    private func paragraph(_ text: String) -> some View {
+    private func paragraph(_ text: LocalizedStringKey) -> some View {
         Text(text).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
     }
 

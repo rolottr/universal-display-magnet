@@ -182,7 +182,7 @@ struct SaveWorkspaceView: View {
             }
             .background(RoundedRectangle(cornerRadius: 10).fill(Color(nsColor: .controlBackgroundColor)))
             HStack {
-                Text("Selected: \(form.apps.filter { form.selectedApps.contains($0.bundleID) }.count) of \(form.apps.count) apps")
+                Text("Selected: \(form.apps.filter { form.selectedApps.contains($0.bundleID) }.count) of \(form.apps.count)")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button("Select All") { form.selectedApps = Set(form.apps.map(\.bundleID)) }
@@ -193,7 +193,7 @@ struct SaveWorkspaceView: View {
         }
     }
 
-    private func section<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
+    private func section<Content: View>(_ title: LocalizedStringKey, @ViewBuilder _ content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title).font(.headline)
             content()
@@ -214,7 +214,7 @@ struct ShortcutRecorder: View {
             Button {
                 recording.value ? stop() : start()
             } label: {
-                Text(recording.value ? "Type shortcut…" : hotkey?.display ?? "Record Shortcut")
+                (recording.value ? Text("Type shortcut…") : hotkey.map { Text($0.display) } ?? Text("Record Shortcut"))
                     .font(.system(size: 12, weight: hotkey == nil ? .regular : .semibold, design: .rounded))
                     .frame(minWidth: 110)
             }
@@ -265,13 +265,14 @@ enum SaveWorkspaceWindow {
 
     static func show(editing layout: WindowLayout? = nil, includeArrangement: Bool = true) {
         let model = AppModel.shared
-        let suggested = model.workspaces.isEmpty ? "Work" : "Workspace \(model.workspaces.count + 1)"
+        let suggested =
+            model.workspaces.isEmpty ? String(localized: "Work") : String(localized: "Workspace \(model.workspaces.count + 1)")
         let form = SaveWorkspaceModel(editing: layout, includeArrangement: includeArrangement, suggestedName: suggested)
         window?.close()
         let w = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 520, height: 720), styleMask: [.titled, .closable],
             backing: .buffered, defer: false)
-        w.title = form.existing == nil ? "Save Workspace" : "Edit Workspace"
+        w.title = form.existing == nil ? String(localized: "Save Workspace") : String(localized: "Edit Workspace")
         w.isReleasedWhenClosed = false
         w.contentViewController = NSHostingController(
             rootView: SaveWorkspaceView(form: form) { [weak w] in w?.close() }

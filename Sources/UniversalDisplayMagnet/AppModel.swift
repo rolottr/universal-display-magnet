@@ -132,11 +132,11 @@ final class AppModel: ObservableObject {
             // Turning our display on will fire our own wake handling: don't echo it back.
             self?.suppressWakeUntil = Date().addingTimeInterval(30)
             WakeService.wakeDisplay()
-            self?.note("Woken by \(self?.deviceName(from) ?? "another Mac")", quiet: true)
+            self?.note(String(localized: "Woken by \(self?.deviceName(from) ?? String(localized: "another Mac"))"), quiet: true)
         }
         sync.onResetUniversalControl = { [weak self] from in
             guard let self else { return }
-            self.note("\(self.deviceName(from)) is resetting Universal Control")
+            self.note(String(localized: "\(self.deviceName(from)) is resetting Universal Control"))
             // The Mac that started the reset puts the arrangement back.
             self.restartUniversalControl(restoreArrangement: false)
         }
@@ -202,7 +202,7 @@ final class AppModel: ObservableObject {
 
         // First launch at a setup we already know: make sure it's arranged.
         if settings.autoApplyArrangements, let p = activeProfile, p.autoApply, !isArranged(p) {
-            apply(p, reason: "Launch")
+            apply(p, reason: String(localized: "Launch"))
         }
     }
 
@@ -256,8 +256,8 @@ final class AppModel: ObservableObject {
     // MARK: - Universal Control arrangement
 
     func deviceName(_ id: String?) -> String {
-        guard let id, id != deviceID else { return "this Mac" }
-        return devices.first { $0.deviceID == id }?.name ?? "another Mac"
+        guard let id, id != deviceID else { return String(localized: "this Mac") }
+        return devices.first { $0.deviceID == id }?.name ?? String(localized: "another Mac")
     }
 
     /// Universal Control's id for a Mac Universal Display Magnet knows (by its displays).
@@ -308,7 +308,7 @@ final class AppModel: ObservableObject {
             try UCBridge.apply(link)
             settings.ucLink = link
             refreshUniversalControl()
-            note("Universal Control updated (\(link.summary))")
+            note(String(localized: "Universal Control updated (\(link.summary))"))
         } catch {
             note(error.localizedDescription)
         }
@@ -323,7 +323,7 @@ final class AppModel: ObservableObject {
         guard let me = universalControl?.selfDevice else { return }
         let items = displays.map { LayoutItem(id: String($0.id), rect: $0.id == id ? rect : $0.frame) }
         guard LayoutEngine.isValid(items) else {
-            note("Displays must touch without overlapping")
+            note(String(localized: "Displays must touch without overlapping"))
             return
         }
         // Links are relative, so compute them in the canvas's coordinates.
@@ -348,7 +348,7 @@ final class AppModel: ObservableObject {
             if let saved = settings.ucLink {
                 settings.ucLink = universalControl?.link(from: saved.device1, to: saved.device2)
             }
-            note("Universal Control arrangement restored")
+            note(String(localized: "Universal Control arrangement restored"))
         } catch {
             note(error.localizedDescription)
         }
@@ -359,8 +359,8 @@ final class AppModel: ObservableObject {
     func resetUniversalControl() {
         guard !resettingUniversalControl else { return }
         for p in peers { sync.sendResetUniversalControl(to: p.id) }
-        let names = ["this Mac"] + peers.map(\.name)
-        note("Resetting Universal Control on \(names.joined(separator: " and "))")
+        let names = [String(localized: "this Mac")] + peers.map(\.name)
+        note(String(localized: "Resetting Universal Control on \(names.formatted(.list(type: .and)))"))
         restartUniversalControl(restoreArrangement: true)
     }
 
@@ -404,7 +404,9 @@ final class AppModel: ObservableObject {
                 if !macs.isEmpty { DispatchQueue.global().async { WakeService.sendMagicPacket(to: macs) } }
             }
         }
-        if !automatic { note("Waking \(devices.filter { $0.deviceID != deviceID }.map(\.name).joined(separator: ", "))") }
+        if !automatic {
+            note(String(localized: "Waking \(devices.filter { $0.deviceID != deviceID }.map(\.name).formatted(.list(type: .and)))"))
+        }
     }
 
     /// A Mac we tried to wake just came online: now turn its display on.
@@ -431,7 +433,7 @@ final class AppModel: ObservableObject {
         let setupChanged = previousSetup != setupKey
         if setupChanged {
             markRestorePending()
-            note("Displays: \(setupLabel.isEmpty ? "none" : setupLabel)", quiet: true)
+            note(String(localized: "Displays: \(setupLabel.isEmpty ? String(localized: "none") : setupLabel)"), quiet: true)
         }
         // Waking up only warrants a restore if the displays actually changed.
         if compareWithSleepState {
@@ -446,10 +448,10 @@ final class AppModel: ObservableObject {
             applyHistory = applyHistory.filter { Date().timeIntervalSince($0) < 60 }
             if applyHistory.count < 4 {
                 applyHistory.append(Date())
-                apply(p, reason: setupChanged ? "Displays connected" : "macOS moved your displays")
+                apply(p, reason: setupChanged ? String(localized: "Displays connected") : String(localized: "macOS moved your displays"))
                 arranged = true
             } else {
-                note("macOS keeps changing the arrangement; auto-apply paused for a minute")
+                note(String(localized: "macOS keeps changing the arrangement; auto-apply paused for a minute"))
             }
         }
 
@@ -522,15 +524,15 @@ final class AppModel: ObservableObject {
                 try DisplayService.applyModes(modes)
                 refreshDisplays()
             } catch {
-                note("Resolution: \(error.localizedDescription)")
+                note(String(localized: "Resolution: \(error.localizedDescription)"))
             }
         }
         guard let t = targets(for: profile) else {
-            note("None of “\(profile.name)”’s displays are connected")
+            note(String(localized: "None of “\(profile.name)”’s displays are connected"))
             return
         }
         if applyItems(t.items) {
-            note("Applied “\(profile.name)”" + (reason.map { " · \($0)" } ?? ""))
+            note(String(localized: "Applied “\(profile.name)”") + (reason.map { " · \($0)" } ?? ""))
         }
     }
 
@@ -560,7 +562,7 @@ final class AppModel: ObservableObject {
     /// no overlaps, near-aligned edges squared up) and keep it that way.
     func snapAllTogether() {
         guard displays.count > 1 else {
-            note("Only one display connected")
+            note(String(localized: "Only one display connected"))
             return
         }
         let items = displays.map { LayoutItem(id: String($0.id), rect: $0.frame) }
@@ -568,10 +570,10 @@ final class AppModel: ObservableObject {
         let snapped = LayoutEngine.normalized(
             LayoutEngine.compact(items, priority: [main], alignThreshold: settings.snapThreshold), mainID: main)
         if snapped == items {
-            note("Displays are already snapped together")
+            note(String(localized: "Displays are already snapped together"))
         } else if applyItems(snapped) {
             rememberCurrentArrangement()
-            note("Snapped \(displays.count) displays together")
+            note(String(localized: "Snapped \(displays.count) displays together"))
         }
     }
 
@@ -582,7 +584,7 @@ final class AppModel: ObservableObject {
             p.displays = displays.map(\.placement)
             update(p)
         } else {
-            saveArrangement(name: "My Setup")
+            saveArrangement(name: String(localized: "My Setup"))
         }
     }
 
@@ -611,7 +613,7 @@ final class AppModel: ObservableObject {
         let items = p.previous.filter { connected.contains($0.key) }.map { LayoutItem(id: String($0.key), rect: $0.value) }
         if items.count == connected.count, LayoutEngine.isValid(items) {
             applyItems(items)
-            note("Reverted to the previous arrangement")
+            note(String(localized: "Reverted to the previous arrangement"))
         }
         scheduleSettle()
     }
@@ -630,7 +632,7 @@ final class AppModel: ObservableObject {
             autoApply: autoApply, restoreModes: restoreModes, deviceID: device?.deviceID ?? deviceID,
             deviceName: device?.name ?? deviceName)
         put(profile, id: profile.id, kind: .arrangement)
-        note("Saved arrangement “\(name)”" + (device.map { " for \($0.name)" } ?? ""))
+        note(device.map { String(localized: "Saved arrangement “\(name)” for \($0.name)") } ?? String(localized: "Saved arrangement “\(name)”"))
         return profile.id
     }
 
@@ -671,7 +673,7 @@ final class AppModel: ObservableObject {
         guard requireAccessibility() else { return }
         let displays = self.displays
         let key = setupKey
-        activity = "Capturing windows…"
+        activity = String(localized: "Capturing windows…")
         windowQueue.async {
             let windows = WindowService.capture(displays: displays, allDesktops: true)
             DispatchQueue.main.async {
@@ -684,8 +686,9 @@ final class AppModel: ObservableObject {
                 let apps = Set(windows.map(\.bundleID)).count
                 self.note(
                     arrangementID == nil
-                        ? "Saved \(windows.count) windows as “\(name)”"
-                        : "Saved workspace “\(name)”: \(self.displays.count) monitors, \(windows.count) windows, \(apps) apps")
+                        ? String(localized: "Saved \(windows.count) windows as “\(name)”")
+                        : String(
+                            localized: "Saved workspace “\(name)”: \(Self.counts(monitors: self.displays.count, windows.count, apps))"))
             }
         }
     }
@@ -730,8 +733,15 @@ final class AppModel: ObservableObject {
             displays: placements)
         put(layout, id: layout.id, kind: .windowLayout)
         let apps = Set(windows.map(\.bundleID)).count
-        note("Saved “\(name)”: \(windows.count) windows from \(apps) apps" + (hotkey.map { " · \($0.display)" } ?? ""))
+        note(String(localized: "Saved “\(name)”: \(Self.counts(windows.count, apps))") + (hotkey.map { " · \($0.display)" } ?? ""))
         registerHotKeys()
+    }
+
+    /// "3 monitors, 12 windows, 5 apps", in the app's language.
+    private static func counts(monitors: Int? = nil, _ windows: Int, _ apps: Int) -> String {
+        ((monitors.map { [String(localized: "\($0) monitors")] } ?? [])
+            + [String(localized: "\(windows) windows"), String(localized: "\(apps) apps")]
+        ).formatted(.list(type: .and, width: .narrow))
     }
 
     /// Put a workspace back: arrange the monitors (and resolutions), then open
@@ -751,13 +761,13 @@ final class AppModel: ObservableObject {
     }
 
     func quickSaveWindows() {
-        saveWindowLayout(name: "Quick Save", id: "quick:\(deviceID):\(setupKey)")
+        saveWindowLayout(name: String(localized: "Quick Save"), id: "quick:\(deviceID):\(setupKey)")
     }
 
     func quickRestoreWindows() {
         let mine = layouts(forSetup: setupKey, device: deviceID)
         guard let layout = mine.first(where: { !$0.isAutosave }) ?? mine.first else {
-            note("No saved window layout for this display setup yet")
+            note(String(localized: "No saved window layout for this display setup yet"))
             return
         }
         restore(layout)
@@ -771,7 +781,7 @@ final class AppModel: ObservableObject {
         }
         isRestoring = true
         let key = setupKey
-        activity = "Restoring “\(layout.name)”…"
+        activity = String(localized: "Restoring “\(layout.name)”…")
         let displays = self.displays
         let options = RestoreOptions(
             moveBetweenDesktops: settings.moveBetweenDesktops,
@@ -785,7 +795,7 @@ final class AppModel: ObservableObject {
                 self.activity = nil
                 if automatic && key == self.setupKey { self.restorePending = false }
                 self.lastAutosave = Date()  // don't snapshot mid-settle
-                self.note("\(report.summary)" + (automatic ? " · automatic" : ""))
+                self.note(report.summary + (automatic ? " · " + String(localized: "automatic") : ""))
             }
         }
     }
@@ -843,7 +853,10 @@ final class AppModel: ObservableObject {
     func requireAccessibility() -> Bool {
         if WindowService.isTrusted { return true }
         WindowService.requestTrust()
-        note("Turn on Universal Display Magnet in System Settings › Privacy & Security › Device Control and Data Access")
+        note(
+            String(
+                localized:
+                    "Turn on Universal Display Magnet in System Settings › Privacy & Security › Device Control and Data Access"))
         return false
     }
 
@@ -856,9 +869,9 @@ final class AppModel: ObservableObject {
         do {
             try SpaceService.enableDesktopShortcuts()
             desktopShortcuts = SpaceService.availableDesktopShortcuts()
-            note("Enabled ⌃1…⌃0 for switching Desktops")
+            note(String(localized: "Enabled ⌃1…⌃0 for switching Desktops"))
         } catch {
-            note("Couldn't enable Desktop shortcuts: \(error.localizedDescription)")
+            note(String(localized: "Couldn't enable Desktop shortcuts: \(error.localizedDescription)"))
         }
     }
 
@@ -873,7 +886,7 @@ final class AppModel: ObservableObject {
         do {
             if on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
         } catch {
-            note("Launch at login: \(error.localizedDescription)")
+            note(String(localized: "Launch at login: \(error.localizedDescription)"))
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
@@ -921,8 +934,8 @@ final class AppModel: ObservableObject {
         guard !accepted.isEmpty else { return }
         storeChanged()
         sync.broadcast(accepted, except: peer)
-        let name = peers.first { $0.id == peer }?.name ?? "another Mac"
-        note("Synced \(accepted.count) change\(accepted.count == 1 ? "" : "s") from \(name)", quiet: true)
+        let name = peers.first { $0.id == peer }?.name ?? String(localized: "another Mac")
+        note(String(localized: "Synced \(accepted.count) changes from \(name)"), quiet: true)
         // An arrangement for the displays on this Mac changed elsewhere.
         if accepted.contains(where: { $0.kind == .arrangement }) { scheduleSettle(after: 0.5) }
     }

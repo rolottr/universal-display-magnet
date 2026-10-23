@@ -57,7 +57,7 @@ struct MenuPanel: View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Universal Display Magnet").font(.headline)
-                Text(model.setupLabel.isEmpty ? "No displays" : model.setupLabel)
+                (model.setupLabel.isEmpty ? Text("No displays") : Text(model.setupLabel))
                     .font(.caption).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer()
@@ -91,7 +91,7 @@ struct MenuPanel: View {
                             .background(RoundedRectangle(cornerRadius: 6).fill(Color.primary.opacity(0.06)))
                     }
                     .buttonStyle(.plain)
-                    .help(c.name + (c.hotkeyEnabled ? c.hotkey.map { "  \($0.display)" } ?? "" : ""))
+                    .help(c.title + (c.hotkeyEnabled ? c.hotkey.map { "  \($0.display)" } ?? "" : ""))
                 }
             }
         }
@@ -124,7 +124,7 @@ struct MenuPanel: View {
                     .padding(4)
                     .background(RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(0.6)))
                 HStack(spacing: 4) {
-                    Text(l.isAutosave ? "Latest snapshot" : l.name).font(.callout).lineLimit(1)
+                    (l.isAutosave ? Text("Latest snapshot") : Text(l.name)).font(.callout).lineLimit(1)
                     Spacer(minLength: 0)
                     if let key = l.hotkey {
                         Text(key.display)

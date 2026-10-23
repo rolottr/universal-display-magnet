@@ -7,9 +7,9 @@ enum RestoreOnConnect: String, Codable, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .off: return "Don't restore"
-        case .autosave: return "Last automatic snapshot"
-        case .latestSaved: return "Most recent saved layout"
+        case .off: return String(localized: "Don't restore")
+        case .autosave: return String(localized: "Last automatic snapshot")
+        case .latestSaved: return String(localized: "Most recent saved layout")
         }
     }
 }

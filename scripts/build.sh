@@ -36,6 +36,11 @@ cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 plutil -replace CFBundleVersion -string "$(date +%Y%m%d%H%M)" "$APP/Contents/Info.plist"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE"
 
+echo "==> Translations"
+for catalog in "$ROOT"/Resources/*.xcstrings; do
+  swift "$ROOT/scripts/strings.swift" compile "$catalog" "$APP/Contents/Resources"
+done
+
 echo "==> App icon"
 rm -rf "$ROOT/build/AppIcon.iconset"
 swift "$ROOT/scripts/generate-icon.swift" "$ROOT/build/AppIcon.iconset" >/dev/null

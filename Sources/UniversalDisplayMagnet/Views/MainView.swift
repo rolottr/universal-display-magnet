@@ -53,18 +53,18 @@ struct MainView: View {
     }
 
     private var syncLine: String {
-        if !model.settings.syncOn { return "Sync off" }
-        if model.peers.isEmpty { return "Looking for your other Mac…" }
-        return "Synced with " + model.peers.map(\.name).joined(separator: ", ")
+        if !model.settings.syncOn { return String(localized: "Sync off") }
+        if model.peers.isEmpty { return String(localized: "Looking for your other Mac…") }
+        return String(localized: "Synced with \(model.peers.map(\.name).formatted(.list(type: .and)))")
     }
 }
 
 /// Explains a missing permission with a button that fixes it.
 struct PermissionBanner: View {
     let icon: String
-    let title: String
-    let detail: String
-    let action: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
+    let action: LocalizedStringKey
     let perform: () -> Void
 
     var body: some View {

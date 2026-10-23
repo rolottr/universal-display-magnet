@@ -1,6 +1,29 @@
 import UniversalDisplayMagnetCore
 import SwiftUI
 
+extension SnapCommand {
+    /// The name to show: built-in commands in the app's language, custom ones as named.
+    var title: String {
+        guard builtIn else { return name }
+        switch id {
+        case "left": return String(localized: "Left")
+        case "right": return String(localized: "Right")
+        case "top": return String(localized: "Top")
+        case "bottom": return String(localized: "Bottom")
+        case "topLeft": return String(localized: "Top Left")
+        case "topRight": return String(localized: "Top Right")
+        case "bottomLeft": return String(localized: "Bottom Left")
+        case "bottomRight": return String(localized: "Bottom Right")
+        case "nextDisplay": return String(localized: "Next Display")
+        case "previousDisplay": return String(localized: "Previous Display")
+        case "maximize": return String(localized: "Maximize")
+        case "center": return String(localized: "Center")
+        case "restore": return String(localized: "Restore")
+        default: return name
+        }
+    }
+}
+
 /// Small icon of a command: its region filled inside a screen outline (like
 /// Magnet's), or a symbol for display moves, centre and restore.
 struct SnapGlyph: View {
@@ -69,7 +92,7 @@ struct SnappingView: View {
                 Spacer()
                 Button {
                     let custom = SnapCommand(
-                        name: "Custom \(model.snapCommands.filter { !$0.builtIn }.count + 1)",
+                        name: String(localized: "Custom \(model.snapCommands.filter { !$0.builtIn }.count + 1)"),
                         action: .region(GridRect(cols: 6, rows: 4, x: 1, y: 0, w: 4, h: 4)), hotkeyEnabled: true)
                     model.updateSnapCommand(custom)
                     selection.value = custom.id
@@ -82,7 +105,7 @@ struct SnappingView: View {
                 ForEach(model.snapCommands) { c in
                     HStack(spacing: 10) {
                         SnapGlyph(command: c)
-                        Text(c.name)
+                        Text(c.title)
                         Spacer()
                         if model.shortcutConflicts.contains(c.id) {
                             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
@@ -115,7 +138,7 @@ private struct CommandDetail: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 if command.builtIn {
-                    Text(command.name).font(.title2.weight(.semibold))
+                    Text(command.title).font(.title2.weight(.semibold))
                 } else {
                     TextField(
                         "Name",
@@ -156,7 +179,7 @@ private struct CommandDetail: View {
                 }
                 if model.shortcutConflicts.contains(command.id) {
                     Label(
-                        "Another app already uses \(command.hotkey?.display ?? "this shortcut") (Magnet?). Quit it or pick a different shortcut.",
+                        "Another app already uses \(command.hotkey?.display ?? String(localized: "this shortcut")) (Magnet?). Quit it or pick a different shortcut.",
                         systemImage: "exclamationmark.triangle.fill"
                     )
                     .font(.caption).foregroundStyle(.orange)
@@ -179,7 +202,7 @@ private struct CommandDetail: View {
         model.updateSnapCommand(c)
     }
 
-    private func card<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
+    private func card<Content: View>(_ title: LocalizedStringKey, @ViewBuilder _ content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title).font(.callout.weight(.medium))
             content()

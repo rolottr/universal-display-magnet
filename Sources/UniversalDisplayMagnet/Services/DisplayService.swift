@@ -110,8 +110,8 @@ enum DisplayService {
 
         var errorDescription: String? {
             switch self {
-            case .begin(let e): return "Could not start display configuration (\(e.rawValue))"
-            case .complete(let e): return "macOS rejected the display configuration (\(e.rawValue))"
+            case .begin(let e): return String(localized: "Could not start display configuration (\(e.rawValue))")
+            case .complete(let e): return String(localized: "macOS rejected the display configuration (\(e.rawValue))")
             }
         }
     }

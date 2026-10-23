@@ -200,13 +200,13 @@ struct ArrangementCanvas: View {
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .help(others.count == 1 ? "Put \(others[0].name) \(phrase(side)) this display" : "Put a display \(phrase(side)) this one")
+        .help(others.count == 1 ? help(side, others[0].name) : help(side))
         .popover(
             isPresented: Binding(get: { pickingSide == side }, set: { if !$0 { pickingSide = nil } }),
             arrowEdge: popoverEdge(side)
         ) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("PLACE \(phrase(side).uppercased())")
+                Text(placeTitle(side)).textCase(.uppercase)
                     .font(.system(size: 9, weight: .medium))
                     .tracking(1.2)
                     .foregroundColor(.secondary)
@@ -245,12 +245,29 @@ struct ArrangementCanvas: View {
         }
     }
 
-    private func phrase(_ side: Side) -> String {
+    private func help(_ side: Side, _ display: String? = nil) -> String {
+        guard let display else {
+            switch side {
+            case .above: return String(localized: "Put a display above this one")
+            case .below: return String(localized: "Put a display below this one")
+            case .left: return String(localized: "Put a display left of this one")
+            case .right: return String(localized: "Put a display right of this one")
+            }
+        }
         switch side {
-        case .above: return "above"
-        case .below: return "below"
-        case .left: return "left of"
-        case .right: return "right of"
+        case .above: return String(localized: "Put \(display) above this display")
+        case .below: return String(localized: "Put \(display) below this display")
+        case .left: return String(localized: "Put \(display) left of this display")
+        case .right: return String(localized: "Put \(display) right of this display")
+        }
+    }
+
+    private func placeTitle(_ side: Side) -> LocalizedStringKey {
+        switch side {
+        case .above: return "Place above"
+        case .below: return "Place below"
+        case .left: return "Place left of"
+        case .right: return "Place right of"
         }
     }
 

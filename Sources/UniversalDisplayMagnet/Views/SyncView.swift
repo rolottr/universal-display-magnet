@@ -113,7 +113,8 @@ struct SyncView: View {
                         Text(d.model).font(.caption).foregroundStyle(.secondary)
                         Text(DisplaySetup.label(for: d.displays.map(\.identity)))
                             .font(.caption).foregroundStyle(.secondary).lineLimit(2)
-                        Text("\(model.profiles(forSetup: d.setupKey).count) arrangements · \(model.windowLayouts.filter { $0.deviceID == d.deviceID }.count) window layouts")
+                        Text("\(model.profiles(forSetup: d.setupKey).count) arrangements") + Text(verbatim: " · ")
+                            + Text("\(model.windowLayouts.filter { $0.deviceID == d.deviceID }.count) window layouts")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()

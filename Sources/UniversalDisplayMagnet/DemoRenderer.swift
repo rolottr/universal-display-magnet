@@ -353,7 +353,7 @@ enum DemoRenderer {
         w.frame(MenuBarDemo(window: rect, keys: nil, label: nil), hold: 10, settle: 0.6)
         for (id, keys) in script {
             let target = frame(of: id, current: rect)
-            let name = commands.first { $0.id == id }?.name
+            let name = commands.first { $0.id == id }?.title
             for f in 1...6 {
                 w.frame(MenuBarDemo(window: lerp(rect, target, ease(Double(f) / 6)), keys: keys, label: name))
             }

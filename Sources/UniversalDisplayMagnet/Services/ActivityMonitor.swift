@@ -88,7 +88,8 @@ final class ActivityMonitor: ObservableObject {
             DispatchQueue.main.async {
                 self.loading = false
                 if lines.isEmpty && p.terminationStatus != 0 {
-                    self.failed = "Couldn't read Universal Control's log (macOS only shares it with administrator accounts)."
+                    self.failed = String(
+                        localized: "Couldn't read Universal Control's log (macOS only shares it with administrator accounts).")
                 }
                 self.ingest(lines)
             }
@@ -129,7 +130,7 @@ final class ActivityMonitor: ObservableObject {
             try p.run()
             stream = p
         } catch {
-            failed = "Couldn't follow Universal Control's log."
+            failed = String(localized: "Couldn't follow Universal Control's log.")
         }
     }
 

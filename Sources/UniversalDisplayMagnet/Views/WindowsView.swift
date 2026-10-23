@@ -35,13 +35,13 @@ struct WindowsView: View {
                 }
 
                 group(
-                    "This setup — \(model.setupLabel)",
+                    String(localized: "This setup — \(model.setupLabel)"),
                     layouts: model.layouts(forSetup: model.setupKey, device: model.deviceID))
                 let others = model.windowLayouts.filter { !($0.setupKey == model.setupKey && $0.deviceID == model.deviceID) }
                 let byDevice = Dictionary(grouping: others, by: \.deviceName)
                 ForEach(byDevice.keys.sorted(), id: \.self) { device in
                     group(
-                        device == model.deviceName ? "Other setups on this Mac" : "From \(device)",
+                        device == model.deviceName ? String(localized: "Other setups on this Mac") : String(localized: "From \(device)"),
                         layouts: byDevice[device]!.sorted { $0.updatedAt > $1.updatedAt })
                 }
             }
@@ -74,7 +74,7 @@ struct WindowsView: View {
 
     private func group(_ title: String, layouts: [WindowLayout]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased()).font(.system(size: 10, weight: .medium)).tracking(1.2).foregroundStyle(.secondary)
+            Text(title).textCase(.uppercase).font(.system(size: 10, weight: .medium)).tracking(1.2).foregroundStyle(.secondary)
             if layouts.isEmpty {
                 Text(
                     model.settings.autosaveWindows
@@ -99,7 +99,7 @@ struct WindowsView: View {
                     .background(RoundedRectangle(cornerRadius: 8).fill(Color.black.opacity(0.7)))
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
-                        Text(layout.name).font(.headline)
+                        (layout.isAutosave ? Text("Automatic snapshot") : Text(layout.name)).font(.headline)
                         if layout.isWorkspace {
                             Text("MONITORS + DESKTOPS + APPS").font(.system(size: 8, weight: .bold)).tracking(0.8)
                                 .padding(.horizontal, 5).padding(.vertical, 1)
@@ -112,7 +112,12 @@ struct WindowsView: View {
                         }
                     }
                     Text(
-                        "\(layout.windows.count) windows · \(Set(layout.windows.map(\.bundleID)).count) apps · \(layout.updatedAt.formatted(.relative(presentation: .named))) · \(DisplaySetup.label(for: layout.displays.map(\.identity)))"
+                        [
+                            String(localized: "\(layout.windows.count) windows"),
+                            String(localized: "\(Set(layout.windows.map(\.bundleID)).count) apps"),
+                            layout.updatedAt.formatted(.relative(presentation: .named)),
+                            DisplaySetup.label(for: layout.displays.map(\.identity)),
+                        ].joined(separator: " · ")
                     )
                     .font(.caption).foregroundStyle(.secondary).lineLimit(2)
                     HStack(spacing: 4) {
@@ -130,7 +135,7 @@ struct WindowsView: View {
                     Button(layout.isAutosave ? "Save as Workspace…" : "Edit…") { SaveWorkspaceWindow.show(editing: layout) }
                     Button(isOpen ? "Hide Windows" : "Show Windows") { toggle(layout.id) }
                     Button(layout.isAutosave ? "Keep as Named Layout…" : "Rename…") {
-                        if let n = Prompt.text("Name this layout", defaultValue: layout.isAutosave ? "" : layout.name) {
+                        if let n = Prompt.text(String(localized: "Name this layout"), defaultValue: layout.isAutosave ? "" : layout.name) {
                             model.rename(layout, to: n)
                         }
                     }
@@ -150,7 +155,9 @@ struct WindowsView: View {
                             Spacer()
                             Text(displayName(w, in: layout)).font(.system(size: 10)).foregroundStyle(.secondary)
                             Text(
-                                w.isFullscreen ? "Full screen" : w.spaceIndex.map { "Desktop \($0)" } ?? "All Desktops"
+                                w.isFullscreen
+                                    ? String(localized: "Full screen")
+                                    : w.spaceIndex.map { String(localized: "Desktop \($0)") } ?? String(localized: "All Desktops")
                             )
                             .font(.system(size: 10, design: .monospaced))
                             .padding(.horizontal, 5).padding(.vertical, 1)
