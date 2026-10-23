@@ -10,32 +10,36 @@ permissions:
 
 jobs:
   build:
-    name: macOS (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: macos-15
-            arch: arm64
-          - runner: macos-15-intel
-            arch: x86_64
+    name: macOS (universal)
+    runs-on: macos-15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Build and package
+      - name: Build and package (ad-hoc signed)
         run: ./scripts/package.sh
       - name: Test
         run: ./scripts/test.sh
       - name: Verify checksum
         working-directory: build
-        run: shasum -a 256 -c Universal-Display-Magnet-macos-${{ matrix.arch }}.zip.sha256
+        run: shasum -a 256 -c Universal-Display-Magnet-*-macos.zip.sha256
       - uses: actions/upload-artifact@v7
         with:
-          name: Universal-Display-Magnet-macos-${{ matrix.arch }}
+          name: Universal-Display-Magnet-macos
           path: |
-            build/Universal-Display-Magnet-macos-${{ matrix.arch }}.zip
-            build/Universal-Display-Magnet-macos-${{ matrix.arch }}.zip.sha256
+            build/Universal-Display-Magnet-*-macos.zip
+            build/Universal-Display-Magnet-*-macos.zip.sha256
           if-no-files-found: error
+
+  test-intel:
+    # The universal build runs on Apple silicon; this runs the tests on Intel too.
+    name: Tests (Intel)
+    runs-on: macos-15-intel
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Test
+        run: ./scripts/test.sh

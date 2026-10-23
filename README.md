@@ -51,7 +51,7 @@ Universal Display Magnet fixes the arrangement once and puts it back every time.
 
 ### Install
 
-1. Download the archive for your Mac from [Releases](https://github.com/rolottr/universal-display-magnet/releases) (`arm64` for Apple Silicon, `x86_64` for Intel), or build it as described below.
+1. Download `Universal-Display-Magnet-<version>-macos.zip` from [Releases](https://github.com/rolottr/universal-display-magnet/releases) and unzip it, or build it as described below. One download runs on both Apple silicon and Intel Macs.
 2. Put **Universal Display Magnet.app** in your Applications folder and open it.
 3. When asked, turn on Universal Display Magnet in **System Settings → Privacy & Security → Device Control and Data Access**, and allow **Local Network** access.
 4. Universal Display Magnet opens at login from then on. Change that under **Settings → General**.
@@ -68,9 +68,7 @@ Install Universal Display Magnet on both and link the Macs once with Universal C
 
 ### About downloaded builds
 
-Builds are **signed with a Developer ID certificate and notarized by Apple**, so they open normally after download. Each release lists SHA-256 checksums for its archives.
-
-`arm64` and `x86_64` are separate builds, not a universal binary.
+Builds are **signed with a Developer ID certificate and notarized by Apple**, so they open normally after download. Each release comes with a SHA-256 checksum. The app is a universal binary for Apple silicon and Intel.
 
 ## Compatibility
 
@@ -78,7 +76,7 @@ Builds are **signed with a Developer ID certificate and notarized by Apple**, so
 | --- | --- |
 | **macOS 27** | Developed and verified on Apple silicon (Mac Studio and Mac mini, USB-C and DisplayPort monitors). |
 | **macOS 14–26** | Expected to work. Universal Control arrangement depends on a private framework; Universal Display Magnet checks it at launch and hides that page if it's missing or different. |
-| **Intel Macs** | Built for `x86_64`, not verified on hardware. |
+| **Intel Macs** | Included in the universal binary, not verified on hardware. |
 
 Universal Control keeps one link per pair of Macs; Universal Display Magnet anchors it on the longest pair of touching displays, and the pointer crosses wherever displays touch. Before writing, Universal Display Magnet backs up the current links and reads the result back through Apple's own decoder, refusing to save if anything doesn't round-trip.
 
@@ -108,7 +106,7 @@ No third-party dependencies, package managers or build-time downloads. The build
 ./scripts/install.sh           # copy into /Applications and open (builds if needed)
 ./scripts/install.sh --build   # rebuild first
 CONFIG=debug ./scripts/build.sh
-ARCH=x86_64 ./scripts/build.sh # Intel build on Apple silicon
+ARCHS=arm64 ./scripts/build.sh # one architecture only (default: universal)
 ```
 
 ### Translations
@@ -122,17 +120,16 @@ Strings live in `Resources/Localizable.xcstrings` (and `InfoPlist.xcstrings` for
 ### Package a build
 
 ```sh
-./scripts/package.sh                 # this Mac's architecture
-ARCH=x86_64 ./scripts/package.sh
+./scripts/package.sh
 ```
 
-This creates an architecture-specific ZIP and SHA-256 checksum in `build/`, for example `Universal-Display-Magnet-macos-arm64.zip` and `Universal-Display-Magnet-macos-arm64.zip.sha256`. To verify a download:
+This builds the universal app and creates a ZIP and SHA-256 checksum in `build/`, for example `Universal-Display-Magnet-0.2.5-macos.zip` and `Universal-Display-Magnet-0.2.5-macos.zip.sha256`. To verify a download:
 
 ```sh
-shasum -a 256 -c Universal-Display-Magnet-macos-arm64.zip.sha256
+shasum -a 256 -c Universal-Display-Magnet-0.2.5-macos.zip.sha256
 ```
 
-The [GitHub Actions workflow](.github/workflows/build.yml) builds, tests and uploads both architectures on pushes, pull requests and manual dispatch. It doesn't publish releases.
+The [GitHub Actions workflow](.github/workflows/build.yml) builds, tests and uploads the universal app on pushes, pull requests and manual dispatch, and runs the tests on Intel too. It doesn't publish releases.
 
 ### README animations
 

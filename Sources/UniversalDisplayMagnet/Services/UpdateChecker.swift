@@ -13,7 +13,7 @@ final class UpdateChecker: ObservableObject {
 
     struct Release: Equatable {
         let version: String
-        /// The release's GitHub page, which lists the archives for each architecture.
+        /// The release's GitHub page, which has the download.
         let pageURL: URL
     }
 

@@ -1,16 +1,16 @@
 #!/bin/zsh
-# Build and package the app for one architecture (default: this Mac's).
-#   ARCH=x86_64 scripts/package.sh
+# Build and package the app: universal (arm64 and x86_64), zipped with a SHA-256 checksum.
+#   scripts/package.sh
 #   SIGN_IDENTITY="Developer ID Application: …" NOTARY_PROFILE=<profile> scripts/package.sh
 #     signs, notarizes and staples the app before zipping it. The profile is a
 #     notarytool keychain profile (xcrun notarytool store-credentials).
 set -euo pipefail
 
 ROOT=${0:A:h:h}
-ARCH=${ARCH:-$(uname -m)}
-CONFIG=release ARCH="$ARCH" "$ROOT/scripts/build.sh"
-ARCHIVE="Universal-Display-Magnet-macos-$ARCH.zip"
+CONFIG=release "$ROOT/scripts/build.sh"
 APP="Universal Display Magnet.app"
+VERSION=$(plutil -extract CFBundleShortVersionString raw "$ROOT/build/$APP/Contents/Info.plist")
+ARCHIVE="Universal-Display-Magnet-$VERSION-macos.zip"
 cd "$ROOT/build"
 rm -f "$ARCHIVE"
 
@@ -19,12 +19,12 @@ if [[ -n "${NOTARY_PROFILE:-}" ]]; then
   echo "==> Notarizing"
   ditto -c -k --sequesterRsrc --keepParent "$APP" notarize.zip
   xcrun notarytool submit notarize.zip --keychain-profile "$NOTARY_PROFILE" \
-    --wait --output-format json > "notarize-$ARCH.json" || true
+    --wait --output-format json > "notarize.json" || true
   rm -f notarize.zip
-  ID=$(plutil -extract id raw "notarize-$ARCH.json")
-  STATUS=$(plutil -extract status raw "notarize-$ARCH.json")
-  xcrun notarytool log "$ID" --keychain-profile "$NOTARY_PROFILE" "notarize-$ARCH-log.json" || true
-  echo "    submission $ID: $STATUS (log: build/notarize-$ARCH-log.json)"
+  ID=$(plutil -extract id raw "notarize.json")
+  STATUS=$(plutil -extract status raw "notarize.json")
+  xcrun notarytool log "$ID" --keychain-profile "$NOTARY_PROFILE" "notarize-log.json" || true
+  echo "    submission $ID: $STATUS (log: build/notarize-log.json)"
   [[ "$STATUS" == Accepted ]] || exit 1
   xcrun stapler staple "$APP"
   xcrun stapler validate "$APP"

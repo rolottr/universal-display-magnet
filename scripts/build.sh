@@ -2,14 +2,14 @@
 # Builds Universal Display Magnet.app with SwiftPM.
 #   scripts/build.sh                 release build into build/Universal Display Magnet.app
 #   CONFIG=debug scripts/build.sh
-#   ARCH=x86_64 scripts/build.sh     another architecture (default: this Mac's)
+#   ARCHS=arm64 scripts/build.sh     one architecture (default: universal, arm64 and x86_64)
 #   SIGN_IDENTITY="Developer ID Application: …" scripts/build.sh
 #                                    Developer ID signature for releases (default: ad-hoc)
 set -euo pipefail
 
 ROOT=${0:A:h:h}
 CONFIG=${CONFIG:-release}
-ARCH=${ARCH:-$(uname -m)}
+ARCHS=(${=ARCHS:-arm64 x86_64})
 case "$CONFIG" in
   release|debug) ;;
   *) echo "CONFIG must be release or debug" >&2; exit 2 ;;
@@ -24,9 +24,11 @@ mkdir -p "$ROOT/build"
 # whose plugin ships only with Xcode), so the Command Line Tools build it
 # with any SDK. Override with SDKROOT=... if needed.
 export SDKROOT=${SDKROOT:-$(xcrun --sdk macosx --show-sdk-path)}
-echo "==> swift build ($CONFIG, $ARCH) with SDK $SDKROOT"
-swift build -c "$CONFIG" --arch "$ARCH" --product UniversalDisplayMagnet
-BIN=$(swift build -c "$CONFIG" --arch "$ARCH" --show-bin-path)
+ARCH_FLAGS=()
+for arch in $ARCHS; do ARCH_FLAGS+=(--arch "$arch"); done
+echo "==> swift build ($CONFIG, $ARCHS) with SDK $SDKROOT"
+swift build -c "$CONFIG" "${ARCH_FLAGS[@]}" --product UniversalDisplayMagnet
+BIN=$(swift build -c "$CONFIG" "${ARCH_FLAGS[@]}" --show-bin-path)
 
 echo "==> Assembling bundle"
 rm -rf "$APP"
