@@ -91,6 +91,8 @@ final class AppModel: ObservableObject {
     private var settleWork: DispatchWorkItem?
     private var lastDisplayChange = Date.distantPast
     private var lastAutosave = Date.distantPast
+    /// The window server's view when the autosave last matched the windows.
+    private var lastCapture: (signature: String, date: Date)?
     private var applyHistory: [Date] = []
     /// An automatic window restore is owed for the current setup. Cleared only
     /// once one completes for that setup; autosave waits until then so a
@@ -808,6 +810,14 @@ final class AppModel: ObservableObject {
         lastAutosave = Date()
         let displays = self.displays
         let key = setupKey
+        // Asking every app for its windows costs a second or more of CPU:
+        // skip it while the window server shows nothing moved. Titles and
+        // minimized windows only show up in a full capture, so take one at
+        // least every 10 minutes anyway.
+        let signature = "\(key)\n" + WindowService.serverSignature()
+        if !force, let last = lastCapture, last.signature == signature, Date().timeIntervalSince(last.date) < 600 {
+            return
+        }
         windowQueue.async {
             let windows = WindowService.capture(displays: displays, allDesktops: true)
             DispatchQueue.main.async {
@@ -817,6 +827,7 @@ final class AppModel: ObservableObject {
                 else { return }
                 let id = WindowLayout.autosaveID(deviceID: self.deviceID, setupKey: key)
                 let old = self.store.value(id: id, as: WindowLayout.self)
+                self.lastCapture = (signature, Date())
                 if old?.windows.map(\.placementSignature) == windows.map(\.placementSignature) { return }
                 let layout = WindowLayout(
                     id: id, name: "Automatic snapshot", setupKey: key, deviceID: self.deviceID,

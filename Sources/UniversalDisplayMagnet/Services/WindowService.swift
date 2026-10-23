@@ -191,6 +191,22 @@ enum WindowService {
         }
     }
 
+    /// Where every app window is, from the window server alone (cheap, no
+    /// Accessibility): changes whenever a capture's placements could, except
+    /// titles and minimized windows, which only Accessibility sees.
+    static func serverSignature() -> String {
+        let me = ProcessInfo.processInfo.processIdentifier
+        let pids = Set(
+            NSWorkspace.shared.runningApplications
+                .filter { $0.activationPolicy == .regular && $0.processIdentifier != me && !$0.isTerminated }
+                .map(\.processIdentifier))
+        let spaces = SpaceService.snapshot()
+        let desktops = spaces.displays.map { "\($0.displayIdentifier) \($0.spaces.map(\.id))" }
+        let windows = serverWindows(pids: pids, visibleSpaces: spaces.currentSpaces)
+            .map { "\($0.pid) \($0.number) \($0.frame) \($0.spaces)" }.sorted()
+        return (desktops + windows).joined(separator: "\n")
+    }
+
     /// Snapshot every window relative to the display and Space it's on.
     /// Positions and Spaces come from the window server (Accessibility can't
     /// see most windows on other Desktops); Accessibility adds titles and
