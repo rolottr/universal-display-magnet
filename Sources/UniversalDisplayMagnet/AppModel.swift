@@ -49,9 +49,15 @@ final class AppModel: ObservableObject {
     }()
 
     @Published private(set) var displays: [LiveDisplay] = []
-    @Published private(set) var setupKey = ""
-    @Published private(set) var arrangements: [ArrangementProfile] = []
-    @Published private(set) var windowLayouts: [WindowLayout] = []
+    @Published private(set) var setupKey = "" {
+        didSet { MenuItems.shared.update(from: self) }
+    }
+    @Published private(set) var arrangements: [ArrangementProfile] = [] {
+        didSet { MenuItems.shared.update(from: self) }
+    }
+    @Published private(set) var windowLayouts: [WindowLayout] = [] {
+        didSet { MenuItems.shared.update(from: self) }
+    }
     @Published private(set) var devices: [DeviceStatus] = []
     /// Universal Control's current cross-Mac arrangement (nil if unavailable).
     @Published private(set) var universalControl: UCBridge.State?
@@ -62,8 +68,12 @@ final class AppModel: ObservableObject {
     @Published private(set) var peers: [SyncService.Peer] = []
     /// Connected Macs whose screens are asleep.
     @Published private(set) var sleepingPeers: Set<String> = []
-    @Published private(set) var resettingUniversalControl = false
-    @Published private(set) var activity: String?
+    @Published private(set) var resettingUniversalControl = false {
+        didSet { MenuItems.shared.update(from: self) }
+    }
+    @Published private(set) var activity: String? {
+        didSet { MenuBarIcon.shared.show(busy: activity != nil) }
+    }
     @Published private(set) var message = ""
     @Published private(set) var log: [LogLine] = []
     @Published private(set) var pendingRevert: PendingRevert?
@@ -112,7 +122,8 @@ final class AppModel: ObservableObject {
         sync.onRecords = { [weak self] records, peer in self?.receive(records, from: peer) }
         sync.onLog = { [weak self] in self?.note($0, quiet: true) }
         sync.onPeerAsleep = { [weak self] peer, asleep in
-            guard let self else { return }
+            // Every ping repeats the state: publish only changes.
+            guard let self, self.sleepingPeers.contains(peer) != asleep else { return }
             if asleep { self.sleepingPeers.insert(peer) } else { self.sleepingPeers.remove(peer) }
         }
         sync.onWake = { [weak self] from in

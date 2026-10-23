@@ -44,6 +44,8 @@ final class ActivityMonitor: ObservableObject {
     @Published private(set) var failed: String?
 
     private var stream: Process?
+    /// When following stopped; the next start reads only the log since then.
+    private var stoppedAt: Date?
     private var seen = Set<String>()
     private var configSource: (device: String, date: Date)?
     private static let historyHours = 6
@@ -57,16 +59,22 @@ final class ActivityMonitor: ObservableObject {
         OR eventMessage CONTAINS "dropping events")
         """
 
-    /// Load the last hours and keep following new entries (once).
+    /// Load the last hours (or what was missed since `stop`) and keep
+    /// following new entries.
     func start() {
         guard stream == nil else { return }
         loading = true
         startStream()
-        let hours = Self.historyHours
+        var range = ["--last", "\(Self.historyHours)h"]
+        if let stoppedAt {
+            let f = DateFormatter()
+            f.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            range = ["--start", f.string(from: stoppedAt.addingTimeInterval(-5))]
+        }
         DispatchQueue.global(qos: .utility).async {
             let p = Process()
             p.executableURL = URL(fileURLWithPath: "/usr/bin/log")
-            p.arguments = ["show", "--last", "\(hours)h", "--style", "ndjson", "--predicate", Self.predicate]
+            p.arguments = ["show"] + range + ["--style", "ndjson", "--predicate", Self.predicate]
             let pipe = Pipe()
             p.standardOutput = pipe
             p.standardError = FileHandle.nullDevice
@@ -87,6 +95,14 @@ final class ActivityMonitor: ObservableObject {
         }
     }
 
+    /// Stop following while nobody is looking (`log stream` isn't free).
+    func stop() {
+        guard let stream else { return }
+        self.stream = nil
+        stoppedAt = Date()
+        stream.terminate()
+    }
+
     private func startStream() {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/log")
@@ -105,9 +121,9 @@ final class ActivityMonitor: ObservableObject {
             let lines = Self.entries(in: complete)
             if !lines.isEmpty { DispatchQueue.main.async { self.ingest(lines) } }
         }
-        p.terminationHandler = { _ in
+        p.terminationHandler = { p in
             // Restarted on the next start() (e.g. reopening Activity).
-            DispatchQueue.main.async { self.stream = nil }
+            DispatchQueue.main.async { if self.stream === p { self.stream = nil } }
         }
         do {
             try p.run()

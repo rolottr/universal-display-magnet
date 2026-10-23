@@ -167,3 +167,25 @@ struct MenuPanel: View {
         }
     }
 }
+
+/// SwiftUI keeps a `.window` menu bar panel's views alive after it closes,
+/// laying them out on every model change. While closed, the panel holds a
+/// blank of the same size instead.
+struct PanelHost<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+    @StateObject private var open = ViewState(true)
+    @StateObject private var size = ViewState(CGSize.zero)
+
+    var body: some View {
+        // A ZStack, not a Group: a Group would hand onAppear to each child.
+        ZStack {
+            if open.value {
+                content().onGeometryChange(for: CGSize.self, of: \.size) { size.value = $0 }
+            } else {
+                Color.clear.frame(width: size.value.width, height: size.value.height)
+            }
+        }
+        .onAppear { open.value = true }
+        .onDisappear { open.value = false }
+    }
+}

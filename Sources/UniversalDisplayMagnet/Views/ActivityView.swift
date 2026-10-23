@@ -38,6 +38,7 @@ struct ActivityView: View {
             .padding(22)
         }
         .onAppear { monitor.start() }
+        .onDisappear { monitor.stop() }
     }
 
     // MARK: - Summary

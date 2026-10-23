@@ -277,6 +277,7 @@ enum SaveWorkspaceWindow {
             rootView: SaveWorkspaceView(form: form) { [weak w] in w?.close() }
                 .environmentObject(model))
         w.center()
+        w.releaseContentOnClose { [weak w] in if window === w { window = nil } }
         window = w
         w.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)

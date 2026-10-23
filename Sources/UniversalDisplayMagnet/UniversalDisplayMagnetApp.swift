@@ -5,24 +5,48 @@ import SwiftUI
 @main
 struct UniversalDisplayMagnetApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
-    @ObservedObject private var model = AppModel.shared
+    // Not observed: every model change would rebuild the scene and redraw the
+    // status item on every menu bar. The label and panel observe what they show.
+    private let model = AppModel.shared
 
     var body: some Scene {
         MenuBarExtra {
-            MenuPanel()
-                .environmentObject(model)
+            PanelHost {
+                MenuPanel()
+                    .environmentObject(model)
+            }
         } label: {
-            Image(systemName: model.activity == nil ? "rectangle.3.group" : "rectangle.3.group.fill")
+            MenuBarLabel()
         }
         .menuBarExtraStyle(.window)
         .commands { AppCommands(model: model) }
     }
 }
 
+/// What the status item shows, published only when it changes.
+@MainActor
+final class MenuBarIcon: ObservableObject {
+    static let shared = MenuBarIcon()
+    @Published private(set) var busy = false
+
+    func show(busy: Bool) {
+        if busy != self.busy { self.busy = busy }
+    }
+}
+
+struct MenuBarLabel: View {
+    @ObservedObject private var icon = MenuBarIcon.shared
+
+    var body: some View {
+        Image(systemName: icon.busy ? "rectangle.3.group.fill" : "rectangle.3.group")
+    }
+}
+
 /// The app's menu bar menus, shown while its window is open (closed, it lives
 /// in the status-bar panel only).
 struct AppCommands: Commands {
-    @ObservedObject var model: AppModel
+    let model: AppModel
+    @ObservedObject private var items = MenuItems.shared
 
     var body: some Commands {
         // The app's own About page instead of the standard About panel.
@@ -54,15 +78,17 @@ struct AppCommands: Commands {
                 .keyboardShortcut("2")
             Button("Wake Other Mac") { model.wakeOtherMacs() }
             Button("Reset Universal Control") { model.resetUniversalControl() }
-                .disabled(model.resettingUniversalControl)
+                .disabled(items.resettingUniversalControl)
             Button("Activity…") { MainWindow.show(.activity) }
                 .keyboardShortcut("6")
             Button("Identify Displays") {
                 IdentifyOverlay.show(names: Dictionary(uniqueKeysWithValues: model.displays.map { ($0.id, $0.identity.name) }))
             }
             Divider()
-            ForEach(model.profiles(forSetup: model.setupKey)) { p in
-                Button("Apply “\(p.name)”") { model.activate(p) }
+            ForEach(items.profiles) { p in
+                Button("Apply “\(p.name)”") {
+                    if let profile = model.arrangements.first(where: { $0.id == p.id }) { model.activate(profile) }
+                }
             }
         }
         CommandMenu("Workspaces") {
@@ -72,8 +98,10 @@ struct AppCommands: Commands {
             Button("Restore Latest Windows") { model.quickRestoreWindows() }
                 .keyboardShortcut("r", modifiers: [.command, .shift])
             Divider()
-            ForEach(model.workspaces) { w in
-                Button("Restore “\(w.name)”") { model.restoreWorkspace(w) }
+            ForEach(items.workspaces) { w in
+                Button("Restore “\(w.name)”") {
+                    if let layout = model.windowLayouts.first(where: { $0.id == w.id }) { model.restoreWorkspace(layout) }
+                }
             }
             Divider()
             Button("All Workspaces & Layouts…") { MainWindow.show(.windows) }
@@ -81,6 +109,32 @@ struct AppCommands: Commands {
             Button("Macs & Sync…") { MainWindow.show(.sync) }
                 .keyboardShortcut("5")
         }
+    }
+}
+
+/// What the menus list, published only when it changes: every other model
+/// update would rebuild the menus and redraw the status item.
+@MainActor
+final class MenuItems: ObservableObject {
+    static let shared = MenuItems()
+
+    struct Item: Equatable, Identifiable {
+        let id: String
+        let name: String
+    }
+
+    @Published private(set) var resettingUniversalControl = false
+    @Published private(set) var profiles: [Item] = []
+    @Published private(set) var workspaces: [Item] = []
+
+    func update(from model: AppModel) {
+        let profiles = model.profiles(forSetup: model.setupKey).map { Item(id: $0.id, name: $0.name) }
+        let workspaces = model.workspaces.map { Item(id: $0.id, name: $0.name) }
+        if model.resettingUniversalControl != resettingUniversalControl {
+            resettingUniversalControl = model.resettingUniversalControl
+        }
+        if profiles != self.profiles { self.profiles = profiles }
+        if workspaces != self.workspaces { self.workspaces = workspaces }
     }
 }
 
@@ -374,12 +428,30 @@ enum MainWindow {
                     .environmentObject(Navigation.shared))
             w.center()
             w.setFrameAutosaveName("Universal Display MagnetMain")
+            w.releaseContentOnClose { window = nil }
             window = w
         }
         // The app drops its Dock icon while no window is open; bring it back with the window.
         NSApp.setActivationPolicy(.regular)
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
+extension NSWindow {
+    /// A closed window's SwiftUI views keep updating with the model: drop
+    /// them (and, in `closed`, the reference) so the next show builds anew.
+    func releaseContentOnClose(_ closed: @escaping @MainActor () -> Void) {
+        var token: NSObjectProtocol?
+        token = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: self, queue: .main) {
+            [weak self] _ in
+            MainActor.assumeIsolated {
+                if let token { NotificationCenter.default.removeObserver(token) }
+                closed()
+                // After the close finishes, which still uses the views.
+                DispatchQueue.main.async { self?.contentViewController = nil }
+            }
+        }
     }
 }
 
